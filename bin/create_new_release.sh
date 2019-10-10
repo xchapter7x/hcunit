@@ -14,7 +14,7 @@ echo "tag id is: "$tag
 echo "creating release"
 github-release release -t ${tag} -p
 echo "uploading files"
-for file in `ls build | grep '^clarity'`
+for file in `ls build | grep '^hcunit'`
 do
   github-release upload -t ${tag} -f build/${file} -n ${file}
 done
