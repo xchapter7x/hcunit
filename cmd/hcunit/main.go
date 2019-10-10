@@ -33,4 +33,14 @@ func init() {
 		"Given a values and template it will render them to stdout",
 		new(commands.RenderCommand),
 	)
+	parser.AddCommand(
+		"version",
+		"display version info",
+		"display version information to stdout",
+		&commands.VersionCommand{
+			Version:   Version,
+			Buildtime: Buildtime,
+			Platform:  Platform,
+		},
+	)
 }

@@ -1,4 +1,4 @@
-package main_test
+package main
 
 import (
 	"bytes"
@@ -62,6 +62,45 @@ func TestCommands(t *testing.T) {
 				session.ExitCode(),
 				string(session.Out.Contents()),
 				string(session.Err.Contents()),
+			)
+		}
+	})
+
+	t.Run("hcunit version", func(t *testing.T) {
+		command := exec.Command(pathToCLI, "version")
+		errOut := new(bytes.Buffer)
+		stdOut := new(bytes.Buffer)
+		session, err := gexec.Start(command, stdOut, errOut)
+		if err != nil {
+			t.Fatalf("failed running command: %v", err)
+		}
+
+		session.Wait(120 * time.Second)
+		if session.ExitCode() != 0 {
+			t.Errorf(
+				"call failed: %v %v %v",
+				session.ExitCode(),
+				string(session.Out.Contents()),
+				string(session.Err.Contents()),
+			)
+		}
+
+		if !strings.Contains(stdOut.String(), Version) {
+			t.Errorf(
+				"expected version output. Instead got:\n%s",
+				stdOut.String(),
+			)
+		}
+		if !strings.Contains(stdOut.String(), Platform) {
+			t.Errorf(
+				"expected platform output. Instead got:\n%s",
+				stdOut.String(),
+			)
+		}
+		if !strings.Contains(stdOut.String(), Buildtime) {
+			t.Errorf(
+				"expected buildtime output. Instead got:\n%s",
+				stdOut.String(),
 			)
 		}
 	})
