@@ -9,17 +9,17 @@ BINARY_DIR=build
 BINARY_WIN=$(BINARY_NAME).exe
 BINARY_UNIX=$(BINARY_NAME)_unix
 BINARY_DARWIN=$(BINARY_NAME)_osx
-NEXT_PATCH=$(shell git pull --tags >/dev/null && git tag -l | grep -v "-" | tail -1 | awk -F. '{print $$1"."$$2"."$$3+1}')
+BUILDTIME=$(shell date -u +%Y-%m-%d.%H:%M:%S)
+BUMP_SEMVER_PATCH=$(shell git pull --tags >/dev/null && git tag -l | grep -v "-" | tail -1 | awk -F. '{print $$1"."$$2"."$$3+1}')
 SHA_SHORT=$(shell git rev-parse --short HEAD)
-SEMVER=$(NEXT_PATCH)-$(SHA_SHORT)
+SEMVER=$(BUMP_SEMVER_PATCH)-$(SHA_SHORT)
+CLI_PATH=./cmd/hcunit
 
 all: test build
 build: build-darwin build-win build-linux 
 test: gen unit e2e
 unit: 
 	$(GOTEST) ./pkg/... -v
-integration: 
-	$(GOTEST) ./test/integration/... -v
 e2e: 
 	$(GOTEST) ./cmd/... -v
 clean: 
@@ -35,17 +35,17 @@ build-darwin:
 	CGO_ENABLED=0 \
 		GOOS=darwin \
 		GOARCH=amd64 \
-		$(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=$(SEMVER) -X main.Platform=OSX/amd64" -v -o $(BINARY_DIR)/$(BINARY_DARWIN) ./cmd/hcunit
+		$(GOBUILD) -ldflags "-X main.Buildtime=$(BUILDTIME) -X main.Version=$(SEMVER) -X main.Platform=OSX/amd64" -v -o $(BINARY_DIR)/$(BINARY_DARWIN) $(CLI_PATH) 
 build-win:
 	CGO_ENABLED=0 \
 		GOOS=windows \
 		GOARCH=amd64 \
-		$(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=$(SEMVER) -X main.Platform=Windows/amd64"-v -o $(BINARY_DIR)/$(BINARY_WIN) ./cmd/hcunit
+		$(GOBUILD) -ldflags "-X main.Buildtime=$(BUILDTIME) -X main.Version=$(SEMVER) -X main.Platform=Windows/amd64"-v -o $(BINARY_DIR)/$(BINARY_WIN) $(CLI_PATH)
 build-linux:
 	CGO_ENABLED=0 \
 		GOOS=linux \
 		GOARCH=amd64 \
-		$(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=$(SEMVER) -X main.Platform=Linux/amd64"-v -o $(BINARY_DIR)/$(BINARY_UNIX) ./cmd/hcunit
+		$(GOBUILD) -ldflags "-X main.Buildtime=$(BUILDTIME) -X main.Version=$(SEMVER) -X main.Platform=Linux/amd64"-v -o $(BINARY_DIR)/$(BINARY_UNIX) $(CLI_PATH)
 release:
 	./bin/create_new_release.sh
 
