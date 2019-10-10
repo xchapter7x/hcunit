@@ -9,6 +9,9 @@ BINARY_DIR=build
 BINARY_WIN=$(BINARY_NAME).exe
 BINARY_UNIX=$(BINARY_NAME)_unix
 BINARY_DARWIN=$(BINARY_NAME)_osx
+NEXT_PATCH=$(shell git pull --tags >/dev/null && git tag -l | grep -v "-" | tail -1 | awk -F. '{print $$1"."$$2"."$$3+1}')
+SHA_SHORT=$(shell git rev-parse --short HEAD)
+SEMVER=$(NEXT_PATCH)-$(SHA_SHORT)
 
 all: test build
 build: build-darwin build-win build-linux 
@@ -29,11 +32,20 @@ dep:
 	go get -u github.com/golang/dep/cmd/dep
 	dep ensure
 build-darwin: 
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=${CIRCLE_SHA1} -X main.Platform=OSX/amd64" -v -o $(BINARY_DIR)/$(BINARY_DARWIN) ./cmd/hcunit
+	CGO_ENABLED=0 \
+		GOOS=darwin \
+		GOARCH=amd64 \
+		$(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=$(SEMVER) -X main.Platform=OSX/amd64" -v -o $(BINARY_DIR)/$(BINARY_DARWIN) ./cmd/hcunit
 build-win:
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=${CIRCLE_SHA1} -X main.Platform=Windows/amd64"-v -o $(BINARY_DIR)/$(BINARY_WIN) ./cmd/hcunit
+	CGO_ENABLED=0 \
+		GOOS=windows \
+		GOARCH=amd64 \
+		$(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=$(SEMVER) -X main.Platform=Windows/amd64"-v -o $(BINARY_DIR)/$(BINARY_WIN) ./cmd/hcunit
 build-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=${CIRCLE_SHA1} -X main.Platform=Linux/amd64"-v -o $(BINARY_DIR)/$(BINARY_UNIX) ./cmd/hcunit
+	CGO_ENABLED=0 \
+		GOOS=linux \
+		GOARCH=amd64 \
+		$(GOBUILD) -ldflags "-X main.Buildtime=`date -u +.%Y%m%d.%H%M%S` -X main.Version=$(SEMVER) -X main.Platform=Linux/amd64"-v -o $(BINARY_DIR)/$(BINARY_UNIX) ./cmd/hcunit
 release:
 	./bin/create_new_release.sh
 
