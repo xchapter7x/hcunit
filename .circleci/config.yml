@@ -1,0 +1,47 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:latest
+    working_directory: /go/src/github.com/xchapter7x/hcunit
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: sudo chmod -R 777 /usr/local
+      - run: go get -u github.com/maxbrunsfeld/counterfeiter
+      - run: go mod init
+      - run: make unit
+      - run: make build
+      - run: mv cmd/hcunit/build build
+      - persist_to_workspace:
+          root: bin
+          paths:
+            - create_new_release.sh
+      - persist_to_workspace:
+          root: build
+          paths:
+            - hcunit.exe
+            - hcunit_osx
+            - hcunit_unix
+  release:
+    docker:
+      - image: socialengine/github-release
+    working_directory: /go/src/github.com/xchapter7x/hcunit
+    steps:
+      - attach_workspace:
+          at: bin
+      - attach_workspace:
+          at: build
+      - run: ./bin/create_new_release.sh
+workflows:
+  version: 2
+  build-and-release:
+    jobs:
+      - build
+      - release:
+          requires:
+            - build
