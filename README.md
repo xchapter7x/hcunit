@@ -1,4 +1,7 @@
 # hcunit
+[![CircleCI](https://circleci.com/gh/xchapter7x/hcunit.svg?style=svg)](https://circleci.com/gh/xchapter7x/hcunit)
+
+
 Helm Chart Unit: helps to unit test rendering of your templates using policies
 
 ## Sample usage
