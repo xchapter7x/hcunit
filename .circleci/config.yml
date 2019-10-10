@@ -14,7 +14,6 @@ jobs:
       - run: sudo chmod -R 777 /usr/local
       - run: make test
       - run: make build
-      - run: mv cmd/hcunit/build build
       - persist_to_workspace:
           root: bin
           paths:
