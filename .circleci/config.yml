@@ -12,9 +12,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run: sudo chmod -R 777 /usr/local
-      - run: go get -u github.com/maxbrunsfeld/counterfeiter
-      - run: go mod init
-      - run: make unit
+      - run: make test
       - run: make build
       - run: mv cmd/hcunit/build build
       - persist_to_workspace:
