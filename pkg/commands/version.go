@@ -8,7 +8,7 @@ type VersionCommand struct {
 	Platform  string
 }
 
-func (x *VersionCommand) Execute(args []string) error {
-	fmt.Printf("ver: %v date: %v platform: %v \n", x.Version, x.Buildtime, x.Platform)
+func (s *VersionCommand) Execute(args []string) error {
+	fmt.Printf("ver: %v date: %v platform: %v \n", s.Version, s.Buildtime, s.Platform)
 	return nil
 }
