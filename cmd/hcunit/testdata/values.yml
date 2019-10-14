@@ -1,0 +1,8 @@
+HttpPort: 8500
+Component: "hcunitcomp"
+uiIngress:
+  enabled: false
+  annotations: {}
+  labels: {}
+  hosts: ["hcunit.com"]
+  tls: []

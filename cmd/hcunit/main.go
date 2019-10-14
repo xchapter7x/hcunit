@@ -17,7 +17,8 @@ var options Options
 var parser = flags.NewParser(&options, flags.Default)
 
 func main() {
-	if _, err := parser.Parse(); err != nil {
+	_, err := parser.Parse()
+	if err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			os.Exit(0)
 		} else {

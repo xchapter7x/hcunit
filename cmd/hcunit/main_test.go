@@ -47,7 +47,7 @@ func TestCommands(t *testing.T) {
 	})
 
 	t.Run("hcunit render -t xxx -v xxx", func(t *testing.T) {
-		command := exec.Command(pathToCLI, "render", "-t", "tpath", "-v", "vpath")
+		command := exec.Command(pathToCLI, "render", "-t", "testdata/templates/something.yml", "-v", "testdata/values.yml")
 		errOut := new(bytes.Buffer)
 		stdOut := new(bytes.Buffer)
 		session, err := gexec.Start(command, stdOut, errOut)
@@ -56,12 +56,38 @@ func TestCommands(t *testing.T) {
 		}
 
 		session.Wait(120 * time.Second)
-		if session.ExitCode() <= 0 {
+		if session.ExitCode() > 0 {
 			t.Errorf(
 				"call failed: %v %v %v",
 				session.ExitCode(),
 				string(session.Out.Contents()),
 				string(session.Err.Contents()),
+			)
+		}
+
+		controlYaml := `---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+  labels:
+    heritage: "Tiller"
+    release: "hcunit-name"
+    component: "hcunit-name-hcunitcomp"
+spec:
+  rules:
+    - host: hcunit.com
+      http:
+        paths:
+          - backend:
+              servicePort: 8500
+
+`
+		if !strings.Contains(stdOut.String(), controlYaml) {
+			t.Errorf(
+				"expected output \n'%v'\n Instead got:\n%s",
+				controlYaml,
+				stdOut.String(),
 			)
 		}
 	})
