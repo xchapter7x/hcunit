@@ -20,7 +20,7 @@ type RenderCommand struct {
 
 func (s *RenderCommand) Execute(args []string) error {
 	s.setDefaults()
-	templateFile, err := validateTemplatePath(s.Template)
+	templateFiles, err := validateTemplatePath(s.Template)
 	if err != nil {
 		return fmt.Errorf("template validation failed: %w", err)
 	}
@@ -29,12 +29,8 @@ func (s *RenderCommand) Execute(args []string) error {
 	if err != nil {
 		return fmt.Errorf("values validation failed: %w", err)
 	}
-	renderedOutput, err := render(
-		valuesFile,
-		map[string]io.Reader{
-			s.Template: templateFile,
-		},
-	)
+
+	renderedOutput, err := render(valuesFile, templateFiles)
 	if err != nil {
 		return fmt.Errorf("error while rendering: %w", err)
 	}
@@ -42,28 +38,31 @@ func (s *RenderCommand) Execute(args []string) error {
 	for _, renderedFile := range renderedOutput {
 		fmt.Fprintf(s.Writer, "---\n%v\n\n", renderedFile)
 	}
+
 	return nil
 }
 
-func render(values io.Reader, templates map[string]io.Reader) (map[string]string, error) {
+func render(values io.ReadCloser, templates map[string]io.ReadCloser) (map[string]string, error) {
 	var name string
-	var reader io.Reader
+	var reader io.ReadCloser
 	var data []byte
+	defer values.Close()
+	chartTemplates := make([]*chart.Template, 0)
 	for name, reader = range templates {
+		defer reader.Close()
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(reader)
 		data = buf.Bytes()
+		chartTemplates = append(chartTemplates, &chart.Template{Name: name, Data: data})
 	}
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(values)
 	valuesRaw := buf.String()
 	testChart := &chart.Chart{
-		Metadata: &chart.Metadata{Name: "hcunit"},
-		Templates: []*chart.Template{
-			{Name: name, Data: data},
-		},
-		Values: &chart.Config{Raw: valuesRaw},
+		Metadata:  &chart.Metadata{Name: "hcunit"},
+		Templates: chartTemplates,
+		Values:    &chart.Config{Raw: valuesRaw},
 	}
 
 	defaultConfig := &chart.Config{Raw: ""}
@@ -86,7 +85,7 @@ func (s *RenderCommand) setDefaults() {
 	}
 }
 
-func validateTemplatePath(templatePath string) (*os.File, error) {
+func validateTemplatePath(templatePath string) (map[string]io.ReadCloser, error) {
 	if templatePath == "" {
 		return nil, fmt.Errorf("'Template' value is empty")
 	}
@@ -103,10 +102,28 @@ func validateTemplatePath(templatePath string) (*os.File, error) {
 
 	templateMode := templateStatus.Mode()
 	if templateMode.IsDir() {
-		return nil, fmt.Errorf("Template directory not yet supported. Only a single file.")
+		files, err := templateFile.Readdir(-1)
+		templateFile.Close()
+		if err != nil {
+			return nil, fmt.Errorf("reading files from directory failed: %w", err)
+		}
+
+		templates := make(map[string]io.ReadCloser)
+
+		for _, file := range files {
+			filePath := fmt.Sprintf("%s/%s", templatePath, file.Name())
+			fileReadCloser, err := os.Open(filePath)
+			if err != nil {
+				return nil, fmt.Errorf("reading file failed: %w", err)
+			}
+
+			templates[filePath] = fileReadCloser
+		}
+
+		return templates, nil
 	}
 
-	return templateFile, nil
+	return map[string]io.ReadCloser{templatePath: templateFile}, nil
 }
 
 func validateValuesPath(valuesPath string) (*os.File, error) {
