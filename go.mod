@@ -22,6 +22,8 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563 // indirect
 	github.com/yashtewari/glob-intersection v0.0.0-20180916065949-5c77d914dd0b // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
+	gopkg.in/yaml.v2 v2.2.4
+	gopkg.in/yaml.v3 v3.0.0-20191010095647-fc94e3f71652
 	k8s.io/apimachinery v0.0.0-20191006235458-f9f2f3f8ab02 // indirect
 	k8s.io/helm v2.14.3+incompatible
 )

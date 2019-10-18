@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+
+	yaml "gopkg.in/yaml.v3"
 )
 
 type EvalCommand struct {
@@ -34,7 +37,30 @@ func (s *EvalCommand) Execute(args []string) error {
 		return fmt.Errorf("error while rendering: %w", err)
 	}
 
-	return evalPolicyOnInput(s.Writer, s.Policy, s.Namespace, renderedOutput)
+	var valuesConfig interface{}
+	valuesFile, err := ioutil.ReadFile(s.Values)
+	if err != nil {
+		return fmt.Errorf("yamlFile.Get err   #%v ", err)
+	}
+
+	err = yaml.Unmarshal(valuesFile, &valuesConfig)
+	if err != nil {
+		return fmt.Errorf("Unmarshal: %v", err)
+	}
+
+	policyInput := make(map[string]interface{})
+	for fpath, template := range renderedOutput {
+		var config interface{}
+		err = yaml.Unmarshal([]byte(template), &config)
+		if err != nil {
+			return fmt.Errorf("Unmarshal: %v", err)
+		}
+
+		policyInput[fpath] = config
+	}
+
+	policyInput[s.Values] = valuesConfig
+	return evalPolicyOnInput(s.Writer, s.Policy, s.Namespace, policyInput)
 }
 
 func (s *EvalCommand) setDefaults() {

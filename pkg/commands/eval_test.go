@@ -73,7 +73,6 @@ func TestEvalCommand(t *testing.T) {
 				values:    "testdata/values.yml",
 				policy:    "testdata/policy/individuals/parse_input.rego",
 				failsWith: nil,
-				skip:      true,
 			},
 			{
 				name:      "values.yml available in input",
@@ -81,7 +80,6 @@ func TestEvalCommand(t *testing.T) {
 				values:    "testdata/values.yml",
 				policy:    "testdata/policy/individuals/values_in_input.rego",
 				failsWith: nil,
-				skip:      true,
 			},
 			{
 				name:      "templates available in input",

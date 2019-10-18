@@ -1,5 +1,5 @@
 package main
 
 expect ["input object should provide values in hash"] {
-  input["hcunit/testdata/values.yml"]
+  input["testdata/values.yml"]
 }
