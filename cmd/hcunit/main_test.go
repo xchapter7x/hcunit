@@ -46,8 +46,54 @@ func TestCommands(t *testing.T) {
 		}
 	})
 
+	t.Run("hcunit eval -t xxx -c xxx -p xxx -v", func(t *testing.T) {
+		for _, tt := range []struct {
+			name          string
+			policy        string
+			expectFailure bool
+		}{
+			{"failing policy should fail", "testdata/policy/failing", true},
+			{"passing policy should pass", "testdata/policy/passing", false},
+		} {
+			t.Run(tt.name, func(t *testing.T) {
+				command := exec.Command(
+					pathToCLI,
+					"eval",
+					"-t", "testdata/templates/something.yml",
+					"-c", "testdata/values.yml",
+					"-p", tt.policy,
+				)
+				errOut := new(bytes.Buffer)
+				stdOut := new(bytes.Buffer)
+				session, err := gexec.Start(command, stdOut, errOut)
+				if err != nil {
+					t.Fatalf("failed running command: %v", err)
+				}
+
+				session.Wait(120 * time.Second)
+				if tt.expectFailure && session.ExitCode() == 0 {
+					t.Errorf(
+						"this was expected to fail but did not: %v %v %v",
+						session.ExitCode(),
+						string(session.Out.Contents()),
+						string(session.Err.Contents()),
+					)
+				}
+
+				if !tt.expectFailure && session.ExitCode() > 0 {
+					t.Errorf(
+						"call failed unexpectedly: %v %v %v",
+						session.ExitCode(),
+						string(session.Out.Contents()),
+						string(session.Err.Contents()),
+					)
+				}
+			})
+		}
+	})
+
 	t.Run("hcunit render -t xxx -v xxx", func(t *testing.T) {
-		command := exec.Command(pathToCLI, "render", "-t", "testdata/templates/something.yml", "-v", "testdata/values.yml")
+		command := exec.Command(pathToCLI, "render", "-t", "testdata/templates/something.yml", "-c", "testdata/values.yml")
 		errOut := new(bytes.Buffer)
 		stdOut := new(bytes.Buffer)
 		session, err := gexec.Start(command, stdOut, errOut)

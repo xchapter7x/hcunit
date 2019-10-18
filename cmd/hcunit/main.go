@@ -44,4 +44,10 @@ func init() {
 			Platform:  Platform,
 		},
 	)
+	parser.AddCommand(
+		"eval",
+		"evaluate a policy on a chart + values",
+		"given a OPS/Rego Policy one can evaluate if the rendered templates of a chart using a given values file meet the defined rules of the policy or not",
+		new(commands.EvalCommand),
+	)
 }
