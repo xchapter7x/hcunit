@@ -9,8 +9,6 @@ jobs:
     working_directory: /go/src/github.com/xchapter7x/hcunit
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run: sudo chmod -R 777 /usr/local
       - run: make test
       - run: make build
