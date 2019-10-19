@@ -71,22 +71,33 @@ func TestCommands(t *testing.T) {
 				}
 
 				session.Wait(120 * time.Second)
-				if tt.expectFailure && session.ExitCode() == 0 {
-					t.Errorf(
-						"this was expected to fail but did not: %v %v %v",
-						session.ExitCode(),
-						string(session.Out.Contents()),
-						string(session.Err.Contents()),
-					)
+				if tt.expectFailure {
+					if !strings.Contains(string(session.Out.Contents()), "FAIL") {
+						t.Errorf("no failure user output found")
+					}
+
+					if session.ExitCode() == 0 {
+						t.Errorf(
+							"this was expected to fail but did not: %v %v %v",
+							session.ExitCode(),
+							string(session.Out.Contents()),
+							string(session.Err.Contents()),
+						)
+					}
 				}
 
-				if !tt.expectFailure && session.ExitCode() > 0 {
-					t.Errorf(
-						"call failed unexpectedly: %v %v %v",
-						session.ExitCode(),
-						string(session.Out.Contents()),
-						string(session.Err.Contents()),
-					)
+				if !tt.expectFailure {
+					if !strings.Contains(string(session.Out.Contents()), "PASS") {
+						t.Errorf("no success user output found")
+					}
+					if session.ExitCode() > 0 {
+						t.Errorf(
+							"call failed unexpectedly: %v %v %v",
+							session.ExitCode(),
+							string(session.Out.Contents()),
+							string(session.Err.Contents()),
+						)
+					}
 				}
 			})
 		}

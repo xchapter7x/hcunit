@@ -155,8 +155,9 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 	topdown.PrettyTrace(bufWriter, *buf)
 	fmt.Fprint(writer, bufWriter.String())
 	if strings.Contains(bufWriter.String(), "Fail ") {
+		fmt.Println("[FAIL] Your policy rules are violated in your rendered output!")
 		return PolicyFailure
 	}
-
+	fmt.Println("[PASS] Your policy rules have been run successfully!")
 	return nil
 }
