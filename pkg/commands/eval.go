@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	yaml "gopkg.in/yaml.v3"
 )
@@ -56,10 +57,10 @@ func (s *EvalCommand) Execute(args []string) error {
 			return fmt.Errorf("Unmarshal '%s' failed: %v", fpath, err)
 		}
 
-		policyInput[fpath] = config
+		policyInput[filepath.Base(fpath)] = config
 	}
 
-	policyInput[s.Values] = valuesConfig
+	policyInput[filepath.Base(s.Values)] = valuesConfig
 	return evalPolicyOnInput(s.Writer, s.Policy, s.Namespace, policyInput)
 }
 

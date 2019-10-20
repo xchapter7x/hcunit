@@ -123,6 +123,7 @@ func TestCommands(t *testing.T) {
 		}
 
 		controlYaml := `---
+#something.yml
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:

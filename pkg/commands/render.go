@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 type RenderCommand struct {
@@ -19,8 +20,8 @@ func (s *RenderCommand) Execute(args []string) error {
 		return fmt.Errorf("error while rendering: %w", err)
 	}
 
-	for _, renderedFile := range renderedOutput {
-		fmt.Fprintf(s.Writer, "---\n%v\n\n", renderedFile)
+	for filename, renderedFile := range renderedOutput {
+		fmt.Fprintf(s.Writer, "---\n#%s\n%v\n\n", filepath.Base(filename), renderedFile)
 	}
 
 	return nil

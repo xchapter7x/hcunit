@@ -8,6 +8,7 @@ import (
 )
 
 var controlYaml string = `---
+#something.yml
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
