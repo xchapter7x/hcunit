@@ -20,6 +20,7 @@ require (
 	github.com/open-policy-agent/opa v0.14.2
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563 // indirect
+	github.com/sergi/go-diff v1.0.0
 	github.com/yashtewari/glob-intersection v0.0.0-20180916065949-5c77d914dd0b // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
 	gopkg.in/yaml.v2 v2.2.4

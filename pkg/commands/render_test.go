@@ -2,30 +2,12 @@ package commands_test
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/xchapter7x/hcunit/pkg/commands"
 )
-
-var controlYaml string = `---
-#something.yml
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  annotations:
-  labels:
-    heritage: "Tiller"
-    release: "hcunit-name"
-    component: "hcunit-name-hcunitcomp"
-spec:
-  rules:
-    - host: hcunit.com
-      http:
-        paths:
-          - backend:
-              servicePort: 8500
-
-`
 
 func TestRenderCommand(t *testing.T) {
 	t.Run("should render the given template using the given values", func(t *testing.T) {
@@ -33,9 +15,10 @@ func TestRenderCommand(t *testing.T) {
 			name     string
 			template string
 			values   string
+			contains []string
 		}{
-			{"template filepath", "testdata/templates/something.yml", "testdata/values.yml"},
-			{"template dir path", "testdata/templates", "testdata/values.yml"},
+			{"template filepath", "testdata/templates/something.yml", "testdata/values.yml", []string{controlYaml}},
+			{"template dir path", "testdata/templates", "testdata/values.yml", []string{controlYaml, controlNotes}},
 		} {
 			t.Run(tt.name, func(t *testing.T) {
 				stdOut := new(bytes.Buffer)
@@ -55,13 +38,15 @@ func TestRenderCommand(t *testing.T) {
 						stdOut.String(),
 					)
 				}
-
-				if stdOut.String() != controlYaml {
-					t.Errorf(
-						"rendered yaml is wrong. \nwanted:\n'%s'\n got:\n'%s'",
-						controlYaml,
-						stdOut.String(),
-					)
+				for _, control := range tt.contains {
+					if !strings.Contains(stdOut.String(), control) {
+						dmp := diffmatchpatch.New()
+						diffs := dmp.DiffMain(control, stdOut.String(), false)
+						t.Errorf(
+							"rendered is wrong:\n%s",
+							dmp.DiffPrettyText(diffs),
+						)
+					}
 				}
 			})
 		}
@@ -127,3 +112,23 @@ func TestRenderCommand(t *testing.T) {
 		}
 	})
 }
+
+var controlYaml string = `---
+#something.yml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+  labels:
+    heritage: "Tiller"
+    release: "hcunit-name"
+    component: "hcunit-name-hcunitcomp"
+spec:
+  rules:
+    - host: hcunit.com
+      http:
+        paths:
+          - backend:
+              servicePort: 8500`
+var controlNotes string = `---
+#NOTES.txt`
