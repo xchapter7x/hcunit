@@ -41,7 +41,7 @@ func TestRenderCommand(t *testing.T) {
 				for _, control := range tt.contains {
 					if !strings.Contains(stdOut.String(), control) {
 						dmp := diffmatchpatch.New()
-						diffs := dmp.DiffMain(control, stdOut.String(), false)
+						diffs := dmp.DiffMain(control, stdOut.String(), true)
 						t.Errorf(
 							"rendered is wrong:\n%s",
 							dmp.DiffPrettyText(diffs),
