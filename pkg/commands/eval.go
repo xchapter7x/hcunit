@@ -45,7 +45,7 @@ func (s *EvalCommand) Execute(args []string) error {
 
 	err = yaml.Unmarshal(valuesFile, &valuesConfig)
 	if err != nil {
-		return fmt.Errorf("Unmarshal: %v", err)
+		return fmt.Errorf("Unmarshal %s failed: %v", valuesFile, err)
 	}
 
 	policyInput := make(map[string]interface{})
@@ -53,7 +53,7 @@ func (s *EvalCommand) Execute(args []string) error {
 		var config interface{}
 		err = yaml.Unmarshal([]byte(template), &config)
 		if err != nil {
-			return fmt.Errorf("Unmarshal: %v", err)
+			return fmt.Errorf("Unmarshal '%s' failed: %v", fpath, err)
 		}
 
 		policyInput[fpath] = config
