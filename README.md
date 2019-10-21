@@ -60,7 +60,7 @@ Available commands:
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
 -> % cat policy/testing_fail.rego
 ───────┬───────────────────────────────────────────────────────────────
-       │ File: policy/testing.rego
+       │ File: policy/testing_fail.rego
 ───────┼───────────────────────────────────────────────────────────────
    1   │ package main
    2   │
