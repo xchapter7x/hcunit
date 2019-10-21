@@ -9,7 +9,7 @@ https://github.com/xchapter7x/hcunit/releases/latest
 
 ## About hcunit
 - Uses [OPA and Rego](https://www.openpolicyagent.org/) to evaluate the yaml to see if it meets your expectations
-- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `expect ["..."]`. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
+- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `expect ["..."] { ... } `. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
 - Your policy rules will have access to a input object. This object will be a hashmap of your rendered templates, with the hash being the filename, and the value being an object representation of the rendered yaml. 
 - uses helm's packages to render the templates so, it should yield identical output as the `helm template` command
 
