@@ -4,24 +4,99 @@
 
 Helm Chart Unit: helps to unit test rendering of your templates using policies
 
+## Download Binaries
+https://github.com/xchapter7x/hcunit/releases/latest
+
+## About hcunit
+- Uses [OPA and Rego](https://www.openpolicyagent.org/) to evaluate the yaml to see if it meets your expectations
+- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `expect ["..."]`. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
+- Your policy rules will have access to a input object. This object will be a hashmap of your rendered templates, with the hash being the filename, and the value being an object representation of the rendered yaml. 
+- uses helm's packages to render the templates so, it should yield identical output as the `helm template` command
+
+
+## Options
+```bash
+-> % hcunit --help
+Usage:
+  hcunit [OPTIONS] <eval | render | version>
+
+Help Options:
+  -h, --help  Show this help message
+
+Available commands:
+  eval     evaluate a policy on a chart + values
+  render   Render a template yaml
+  version  display version info
+```
+
+
+
 ## Sample usage
-```
-$> hcunit mychartdir
-Running Policy `values_invalid_test.rego` with fixture data in `values_invalid_test.yml`... [PASS]
-Running Policy `values_valid_test.rego` with fixture data in `values_valid_test.yml`... [PASS]
-Running Policy `values_scenariob_test.rego` with fixture data in `values_scenariob_test.yml`... [FAIL]
---------------------------------------------------------------------------------
+```bash
+000@000-000 [00:00:00] [helm-charts/concourse] [master *]
+-> % cat policy/testing.rego
+───────┬───────────────────────────────────────────────────────────────
+       │ File: policy/testing.rego
+───────┼───────────────────────────────────────────────────────────────
+   1   │ package main
+   2   │
+   3   │ expect [msg] {
+   4   │   msg = "noop pass rule"
+   5   │   true
+   6   │ }
+   7   │
+   8   │ expect [msg] {
+   9   │   msg = "we should have values and secrets"
+  10   │   input["values.yaml"]
+  11   │   n = input["web-secrets.yaml"].metadata.name
+  12   │   n == "hcunit-name-web"
+  13   │ }
+───────┴───────────────────────────────────────────────────────────────
 
-data.authz.test_post_allowed: FAIL (607ns)
-data.authz.test_get_anonymous_denied: PASS (288ns)
-data.authz.test_get_user_allowed: PASS (346ns)
-data.authz.test_get_another_user_denied: PASS (365ns)
---------------------------------------------------------------------------------
-PASS: 3/4
-FAIL: 1/4
+000@000-000 [00:00:00] [helm-charts/concourse] [master *]
+-> % hcunit eval -t templates/ -c values.yaml -p policy/testing.rego
+[PASS] Your policy rules have been run successfully!
+
+000@000-000 [00:00:00] [helm-charts/concourse] [master *]
+-> % cat policy/testing_fail.rego
+───────┬───────────────────────────────────────────────────────────────
+       │ File: policy/testing.rego
+───────┼───────────────────────────────────────────────────────────────
+   1   │ package main
+   2   │
+   3   │ expect [msg] {
+   4   │   msg = "noop pass rule"
+   5   │   true
+   6   │ }
+   7   │
+   8   │ expect [msg] {
+   9   │   msg = "we should have values and secrets"
+  10   │   input["values.yaml"]
+  11   │   n = input["web-secrets.yaml"].metadata.name
+  12   │   n == "WRONGNAME"
+  13   │ }
+───────┴───────────────────────────────────────────────────────────────
+
+000@000-000 [00:00:00] [helm-charts/concourse] [master *]
+-> % hcunit eval -t templates/ -c values.yaml -p policy/testing_fail.rego
+[FAIL] Your policy rules are violated in your rendered output!
+your policy failed
+
 ```
 
-## Functionality
+
+
+
+
+
+
+
+
+
+
+
+
+## Future Suite Functionality
 hcunit will traverse the `test` directory and for each _test.yml & _test.rego pair will use the `.yml` file as a values input for rendering and run the corresponding rego policy against the rendered templates. the input object made available in the rego policy will be a hashmap with keys using the paths of the rendered templates and the values file. The corresponding value in the hashmap being the object representation of the files.
 
 
