@@ -96,27 +96,3 @@ your policy failed
 
 
 
-## Future Suite Functionality
-hcunit will traverse the `test` directory and for each _test.yml & _test.rego pair will use the `.yml` file as a values input for rendering and run the corresponding rego policy against the rendered templates. the input object made available in the rego policy will be a hashmap with keys using the paths of the rendered templates and the values file. The corresponding value in the hashmap being the object representation of the files.
-
-
-## Chart Dir Convention
-```
-chart
-│   README.md    
-│
-└───templates
-│   │   NOTES.txt
-│   │   _helpers.tpl
-│   │   web-deployment.yaml
-│   │   web-ingress.yaml
-│   
-└───test
-    │   values_invalid_test.yml
-    │   values_invalid_test.rego
-    │   values_valid_test.yml
-    │   values_valid_test.rego 
-    │   values_scenariob_test.yml
-    │   values_scenariob_test.rego
-```
-
