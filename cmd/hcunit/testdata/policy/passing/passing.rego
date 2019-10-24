@@ -1,7 +1,7 @@
 package main
 
 expect ["force passing"] {
-  true
+  true; trace(sprintf("[TRACE] %s", [input]))
 }
 
 expect ["another passing case"] {

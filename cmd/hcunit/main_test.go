@@ -46,7 +46,29 @@ func TestCommands(t *testing.T) {
 		}
 	})
 
-	t.Run("hcunit eval -t xxx -c xxx -p xxx -v", func(t *testing.T) {
+	t.Run("hcunit eval with verbose flag should print trace notes", func(t *testing.T) {
+		command := exec.Command(
+			pathToCLI,
+			"eval",
+			"-t", "testdata/templates/something.yml",
+			"-c", "testdata/values.yml",
+			"-p", "testdata/policy/passing",
+			"-v",
+		)
+		errOut := new(bytes.Buffer)
+		stdOut := new(bytes.Buffer)
+		session, err := gexec.Start(command, stdOut, errOut)
+		if err != nil {
+			t.Fatalf("failed running command: %v", err)
+		}
+
+		session.Wait(120 * time.Second)
+		if !strings.Contains(string(session.Out.Contents()), "[TRACE]") {
+			t.Errorf("no trace output found")
+		}
+	})
+
+	t.Run("hcunit eval -t xxx -c xxx -p xxx", func(t *testing.T) {
 		for _, tt := range []struct {
 			name          string
 			policy        string
@@ -103,7 +125,7 @@ func TestCommands(t *testing.T) {
 		}
 	})
 
-	t.Run("hcunit render -t xxx -v xxx", func(t *testing.T) {
+	t.Run("hcunit render -t xxx -c xxx", func(t *testing.T) {
 		command := exec.Command(pathToCLI, "render", "-t", "testdata/templates/something.yml", "-c", "testdata/values.yml")
 		errOut := new(bytes.Buffer)
 		stdOut := new(bytes.Buffer)
