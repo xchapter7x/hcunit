@@ -20,6 +20,7 @@ import (
 
 var FilepathValueEmpty = errors.New("given filepath value is empty")
 var FilepathDirUnexpected = errors.New("filepath given is a Dir. We expect a path to a file")
+var UnmatchedQuery = errors.New("your given query did not yield any matches")
 var InvalidPolicyPath = errors.New("invalid policy path")
 var PolicyFailure = errors.New("your policy failed")
 var expectQuery = regexp.MustCompile("^expect(_[a-zA-Z]+)*$")
@@ -139,25 +140,41 @@ func validateFilePath(filePath string) (*os.File, error) {
 }
 
 func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input interface{}) error {
+	bufWriter := new(bytes.Buffer)
 	ctx := context.Background()
-	buf := topdown.NewBufferTracer()
-	_, err := rego.New(
-		rego.Query(fmt.Sprintf("data.%s.%s", namespace, "expect[_]")),
-		rego.Input(input),
-		rego.Tracer(buf),
-		rego.Load([]string{policy}, nil),
-	).Eval(ctx)
-	if err != nil {
-		return fmt.Errorf("failed eval on policies: %w", err)
+	var results rego.ResultSet
+	for _, querySuffix := range []string{"expect[_]", "assert[_]"} {
+		buf := topdown.NewBufferTracer()
+		query, err := rego.New(
+			rego.Query(fmt.Sprintf("data.%s.%s", namespace, querySuffix)),
+			rego.Tracer(buf),
+			rego.Load([]string{policy}, nil),
+		).PrepareForEval(ctx)
+		if err != nil {
+			return fmt.Errorf("failed preparing for eval on policies: %w", err)
+		}
+
+		r, err := query.Eval(ctx, rego.EvalInput(input))
+		if err != nil {
+			return fmt.Errorf("failed eval on policies: %w", err)
+		}
+
+		if len(r) > 0 {
+			results = append(results, r...)
+			topdown.PrettyTrace(bufWriter, *buf)
+			fmt.Fprint(writer, bufWriter.String())
+		}
 	}
 
-	bufWriter := new(bytes.Buffer)
-	topdown.PrettyTrace(bufWriter, *buf)
-	fmt.Fprint(writer, bufWriter.String())
+	if len(results) <= 0 {
+		return UnmatchedQuery
+	}
+
 	if strings.Contains(bufWriter.String(), "Fail ") {
 		fmt.Println("[FAIL] Your policy rules are violated in your rendered output!")
 		return PolicyFailure
 	}
+
 	fmt.Println("[PASS] Your policy rules have been run successfully!")
 	return nil
 }

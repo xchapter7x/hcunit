@@ -88,6 +88,20 @@ func TestEvalCommand(t *testing.T) {
 				policy:    "testdata/policy/individuals/templates_in_input.rego",
 				failsWith: nil,
 			},
+			{
+				name:      "supports assert[_] rule query",
+				template:  "testdata/templates",
+				values:    "testdata/values.yml",
+				policy:    "testdata/policy/individuals/alternate_keyword.rego",
+				failsWith: nil,
+			},
+			{
+				name:      "should error when no query match in rego",
+				template:  "testdata/templates",
+				values:    "testdata/values.yml",
+				policy:    "testdata/policy/individuals/no_keyword.rego",
+				failsWith: commands.UnmatchedQuery,
+			},
 		} {
 			t.Run(tt.name, func(t *testing.T) {
 				if tt.skip {
