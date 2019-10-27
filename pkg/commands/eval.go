@@ -49,20 +49,9 @@ func (s *EvalCommand) Execute(args []string) error {
 		return fmt.Errorf("Unmarshal %s failed: %v", valuesFile, err)
 	}
 
-	policyInput := make(map[string]interface{})
-	for fpath, template := range renderedOutput {
-		if filepath.Ext(fpath) == ".yml" || filepath.Ext(fpath) == ".yaml" {
-			var config interface{}
-			err = yaml.Unmarshal([]byte(template), &config)
-			if err != nil {
-				return fmt.Errorf("Unmarshal '%s' failed: %v", fpath, err)
-			}
-
-			policyInput[filepath.Base(fpath)] = config
-
-		} else {
-			policyInput[filepath.Base(fpath)] = template
-		}
+	policyInput, err := UnmarshalYamlMap(renderedOutput)
+	if err != nil {
+		return fmt.Errorf("formatting policy input failed: %w", err)
 	}
 
 	policyInput[filepath.Base(s.Values)] = valuesConfig

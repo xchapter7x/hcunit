@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/helm/helm/pkg/renderutil"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/topdown"
+	yaml "gopkg.in/yaml.v3"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
@@ -37,6 +39,39 @@ func validateAndRender(template, values string) (map[string]string, error) {
 	}
 
 	return render(valuesFile, templateFiles)
+}
+
+func UnmarshalYamlMap(in map[string]string) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	for fpath, template := range in {
+		if filepath.Ext(fpath) == ".yml" || filepath.Ext(fpath) == ".yaml" {
+			spl := strings.Split(template, "\n---\n")
+			var configDocs []interface{}
+			for _, doc := range spl {
+				var config interface{}
+				err := yaml.Unmarshal([]byte(doc), &config)
+				if err != nil {
+					return nil, fmt.Errorf("Unmarshal '%s' failed: %v", fpath, err)
+				}
+
+				if config != nil {
+					configDocs = append(configDocs, config)
+				}
+			}
+
+			if configDocs != nil && len(configDocs) > 1 {
+				out[filepath.Base(fpath)] = configDocs
+			}
+
+			if configDocs != nil && len(configDocs) == 1 {
+				out[filepath.Base(fpath)] = configDocs[0]
+			}
+
+		} else {
+			out[filepath.Base(fpath)] = template
+		}
+	}
+	return out, nil
 }
 
 func render(values io.ReadCloser, templates map[string]io.ReadCloser) (map[string]string, error) {
