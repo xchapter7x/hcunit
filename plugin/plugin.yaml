@@ -1,0 +1,13 @@
+name: "unit"
+version: "0.1.0"
+usage: "$HELM_BIN unit -t <template-dir> -c <values.yml> -p <policy-dir> (-v optional verbose output)"
+description: "hcunit can be used to enforce policies on the output of a helm template rendering. in effect you are using policy rules to unit test the rendered output meets your expectations"
+ignoreFlags: false
+command: "$HELM_PLUGIN_DIR/hcunit_unix eval"
+platformCommand:
+  - os: linux
+    command: "$HELM_PLUGIN_DIR/hcunit_unix eval"
+  - os: darwin
+    command: "$HELM_PLUGIN_DIR/hcunit_osx eval"
+  - os: windows
+    command: "$HELM_PLUGIN_DIR/hcunit.exe eval"
