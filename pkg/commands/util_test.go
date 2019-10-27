@@ -53,7 +53,7 @@ func TestUnmarshalYamlMap(t *testing.T) {
 		{
 			name: "multidoc yaml should unmarshal into an array element for each doc",
 			yamlMap: map[string]string{"random.yml": `---
-something: firstdoc
+something: firstdoc---
 
 ---
 

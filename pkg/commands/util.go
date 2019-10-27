@@ -45,9 +45,9 @@ func UnmarshalYamlMap(in map[string]string) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
 	for fpath, template := range in {
 		if filepath.Ext(fpath) == ".yml" || filepath.Ext(fpath) == ".yaml" {
-			spl := strings.Split(template, "\n---\n")
+			documents := strings.Split(template, "\n---\n")
 			var configDocs []interface{}
-			for _, doc := range spl {
+			for _, doc := range documents {
 				var config interface{}
 				err := yaml.Unmarshal([]byte(doc), &config)
 				if err != nil {
