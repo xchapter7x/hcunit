@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-git pull --tags >/dev/null
+git pull --tags >/dev/null || true
 
 echo "generate a rc build number"
 BUMP_SEMVER_PATCH=$(git tag -l | grep -v "-" | tail -1 | awk -F. '{print $1"."$2"."$3+1}')
