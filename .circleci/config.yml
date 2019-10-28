@@ -27,6 +27,7 @@ jobs:
       - image: socialengine/github-release
     working_directory: /go/src/github.com/xchapter7x/hcunit
     steps:
+      - checkout
       - attach_workspace:
           at: bin
       - attach_workspace:
