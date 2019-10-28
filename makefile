@@ -28,9 +28,6 @@ clean:
 	rm -fr $(BINARY_DIR)
 gen:
 	go generate ./...
-dep:
-	go get -u github.com/golang/dep/cmd/dep
-	dep ensure
 build-darwin: 
 	CGO_ENABLED=0 \
 		GOOS=darwin \
