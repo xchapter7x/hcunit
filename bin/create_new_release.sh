@@ -1,9 +1,10 @@
 #!/bin/bash -x
 apk update
 apk add git
+apk add openssh
+git pull --tags >/dev/null
 
 echo "generate a rc build number"
-git pull --tags >/dev/null
 BUMP_SEMVER_PATCH=$(git tag -l | grep -v "-" | tail -1 | awk -F. '{print $1"."$2"."$3+1}')
 BUMP_SEMVER_RC=$(git tag -l | grep "${BUMP_SEMVER_PATCH}" | grep -e "-rc" | tail -1 | awk -F"-rc." '{print $2+1}')
 SEMVER=${BUMP_SEMVER_PATCH}-rc.${BUMP_SEMVER_RC}
