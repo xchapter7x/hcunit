@@ -1,4 +1,7 @@
 #!/bin/bash -x
+apk update
+apk add git
+
 echo "generate a rc build number"
 git pull --tags >/dev/null
 BUMP_SEMVER_PATCH=$(git tag -l | grep -v "-" | tail -1 | awk -F. '{print $1"."$2"."$3+1}')
