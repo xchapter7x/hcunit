@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -xe
 apk update
 apk add git
 apk add openssh
@@ -15,5 +15,5 @@ github-release release -t ${SEMVER} -p
 echo "uploading files"
 for file in `ls build | grep '^hcunit'`
 do
-  github-release upload -t ${tag} -f build/${file} -n ${file}
+  github-release upload -t ${SEMVER} -f build/${file} -n ${file}
 done
