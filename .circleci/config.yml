@@ -32,6 +32,10 @@ jobs:
           at: bin
       - attach_workspace:
           at: build
+      - run: apk update
+      - run: apk add git
+      - run: apk add openssh
+      - run: ssh -o StrictHostKeyChecking=no xchapter7x@github.com || true
       - run: ./bin/create_new_release.sh
 workflows:
   version: 2
