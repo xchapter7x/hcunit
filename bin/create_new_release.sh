@@ -1,4 +1,7 @@
 #!/bin/bash -xe
+if [ -z ${GITHUB_REPO+x} ]; then echo "GITHUB_REPO is unset"; exit 1; fi
+if [ -z ${GITHUB_TOKEN+x} ]; then echo "GITHUB_TOKEN is unset"; exit 1; fi
+if [ -z ${GITHUB_USER+x} ]; then echo "GITHUB_USER is unset"; exit 1; fi
 git pull --tags >/dev/null || true
 
 echo "generate a rc build number"
