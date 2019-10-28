@@ -2,7 +2,7 @@
 apk update
 apk add git
 apk add openssh
-ssh -o StrictHostKeyChecking=no username@hostname.com
+ssh -o StrictHostKeyChecking=no xchapter7x@github.com
 git pull --tags >/dev/null
 
 echo "generate a rc build number"
