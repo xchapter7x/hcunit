@@ -12,6 +12,7 @@ jobs:
       - run: sudo chmod -R 777 /usr/local
       - run: make test
       - run: make build
+      - run: cp plugin/plugin.yaml build/.
       - persist_to_workspace:
           root: bin
           paths:
@@ -22,6 +23,7 @@ jobs:
             - hcunit.exe
             - hcunit_osx
             - hcunit_unix
+            - plugin.yaml
   release:
     docker:
       - image: socialengine/github-release
