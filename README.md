@@ -44,7 +44,7 @@ https://github.com/xchapter7x/hcunit/releases/latest
 
 ## About hcunit
 - Uses [OPA and Rego](https://www.openpolicyagent.org/) to evaluate the yaml to see if it meets your expectations
-- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `expect ["..."] { ... } `. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
+- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `assert ["some behavior"] { ... } ` or `expect ["some other behavior"] { ... } `. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
 - Your policy rules will have access to a input object. This object will be a hashmap of your rendered templates, with the hash being the filename, and the value being an object representation of the rendered yaml. It will also contain a hash for the NOTES file, which will be a string. 
 - uses helm's packages to render the templates so, it should yield identical output as the `helm template` command
 
@@ -75,17 +75,16 @@ Available commands:
 ───────┼───────────────────────────────────────────────────────────────
    1   │ package main
    2   │
-   3   │ expect [msg] {
-   4   │   msg = "noop pass rule"
+   3   │ assert [behavior] {
+   4   │   behavior = "this should always be true b/c its true"
    5   │   true
    6   │ }
    7   │
-   8   │ expect [msg] {
-   9   │   msg = "we should have values and secrets"
-  10   │   input["values.yaml"]
-  11   │   n = input["web-secrets.yaml"].metadata.name
-  12   │   n == "hcunit-name-web"
-  13   │ }
+   8   │ assert [behavior] {
+   9   |     behavior = "when web is enabled then namespace is toggled on"
+   10  |     "true" == input["values.yaml"].web.enabled
+   11  │     "Namespace" == input["namespace.yaml"].kind
+   12  │ }
 ───────┴───────────────────────────────────────────────────────────────
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
@@ -99,17 +98,16 @@ Available commands:
 ───────┼───────────────────────────────────────────────────────────────
    1   │ package main
    2   │
-   3   │ expect [msg] {
-   4   │   msg = "noop pass rule"
-   5   │   true
+   3   │ assert [behavior] {
+   4   │   behavior = "this should always be true b/c its true"
+   5   │   false
    6   │ }
    7   │
-   8   │ expect [msg] {
-   9   │   msg = "we should have values and secrets"
-  10   │   input["values.yaml"]
-  11   │   n = input["web-secrets.yaml"].metadata.name
-  12   │   n == "WRONGNAME"
-  13   │ }
+   8   │ assert [behavior] {
+   9   |     behavior = "when web is enabled then namespace is toggled on"
+   10  |     "true" == input["values.yaml"].web.enabled
+   11  │     "NamespaceWrongKind" == input["namespace.yaml"].kind
+   12  │ }
 ───────┴───────────────────────────────────────────────────────────────
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
