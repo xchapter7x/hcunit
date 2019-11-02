@@ -11,7 +11,7 @@ if [[ ${BUMP_SEMVER_PATCH} -eq "" ]]; then
 fi
 BUMP_SEMVER_RC=$(git tag -l | grep "${BUMP_SEMVER_PATCH}" | grep -e "-rc" | tail -1 | awk -F"-rc." '{print $2+1}')
 if [[ ${BUMP_SEMVER_RC} -eq "" ]]; then
-  BUMP_SEMVER_RC="-rc.0"
+  BUMP_SEMVER_RC="0"
 fi
 SEMVER=${BUMP_SEMVER_PATCH}-rc.${BUMP_SEMVER_RC}
 echo "tag id is: "${SEMVER}
