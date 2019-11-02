@@ -33,16 +33,19 @@ build-darwin:
 		GOOS=darwin \
 		GOARCH=amd64 \
 		$(GOBUILD) -ldflags "-X main.Buildtime=$(BUILDTIME) -X main.Version=$(SEMVER) -X main.Platform=OSX/amd64" -v -o $(BINARY_DIR)/$(BINARY_DARWIN) $(CLI_PATH) 
+	chmod +x $(BINARY_DIR)/$(BINARY_DARWIN)
 build-win:
 	CGO_ENABLED=0 \
 		GOOS=windows \
 		GOARCH=amd64 \
 		$(GOBUILD) -ldflags "-X main.Buildtime=$(BUILDTIME) -X main.Version=$(SEMVER) -X main.Platform=Windows/amd64"-v -o $(BINARY_DIR)/$(BINARY_WIN) $(CLI_PATH)
+	chmod +x $(BINARY_DIR)/$(BINARY_WIN)
 build-linux:
 	CGO_ENABLED=0 \
 		GOOS=linux \
 		GOARCH=amd64 \
 		$(GOBUILD) -ldflags "-X main.Buildtime=$(BUILDTIME) -X main.Version=$(SEMVER) -X main.Platform=Linux/amd64"-v -o $(BINARY_DIR)/$(BINARY_UNIX) $(CLI_PATH)
+	chmod +x $(BINARY_DIR)/$(BINARY_UNIX)
 release:
 	./bin/create_new_release.sh
 

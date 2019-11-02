@@ -9,6 +9,8 @@ BUMP_SEMVER_PATCH=$(git tag -l | grep -v "-" | tail -1 | awk -F. '{print $1"."$2
 BUMP_SEMVER_RC=$(git tag -l | grep "${BUMP_SEMVER_PATCH}" | grep -e "-rc" | tail -1 | awk -F"-rc." '{print $2+1}')
 SEMVER=${BUMP_SEMVER_PATCH}-rc.${BUMP_SEMVER_RC}
 echo "tag id is: "${SEMVER}
+echo "creating plugin tarball"
+tar -czvf build/hcunit_plugin.tgz --directory=build hcunit_osx hcunit.exe hcunit_unix plugin.yaml
 echo "creating release"
 github-release release -t ${SEMVER} -p
 echo "uploading files"
