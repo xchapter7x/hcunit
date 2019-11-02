@@ -4,7 +4,42 @@
 
 Helm Chart Unit: helps to unit test rendering of your templates using policies
 
-## Download Binaries
+## Usage as a Helm Plugin:
+
+```bash
+$> echo "install the latest version of the plugin"
+$> helm plugin install https://github.com/xchapter7x/hcunit/releases/latest/download/hcunit_plugin.tgz
+Installed plugin: unit
+
+$> echo "you might have have to make the plugin binaries executable"
+$> helm env | grep "HELM_PLUGIN" | awk -F"=" '{print $2}' | awk -F\" '{print "chmod +x "$2"/hcunit_plugin/hcunit*"}' |sh
+
+$> echo "lets run some tests of our templates' logic"
+$> helm unit -t templates -c policy/values_toggle_on.yaml -p policy/testing_toggle_on.rego
+[PASS] Your policy rules have been run successfully!
+
+$> echo "lets explore the available flags for the plugin call"
+$> helm unit --help
+Usage:
+  hcunit_osx [OPTIONS] eval [eval-OPTIONS]
+
+given a OPA/Rego Policy one can evaluate if the rendered templates of a chart using a given values file meet the defined rules of the policy or not
+
+Help Options:
+  -h, --help           Show this help message
+
+[eval command options]
+      -t, --template=  path to yaml template you would like to render
+      -c, --values=    path to values file you would like to use for rendering
+      -p, --policy=    path to rego policies to evaluate against rendered templates
+      -n, --namespace= policy namespace to query for rules
+      -v, --verbose    prints tracing output to stdout
+      
+```
+
+
+
+## Usage as a Standalone CLI... Download Binaries
 https://github.com/xchapter7x/hcunit/releases/latest
 
 ## About hcunit
