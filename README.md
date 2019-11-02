@@ -118,10 +118,12 @@ your policy failed
 ```
 
 
+## Notes on Rego
 
+Rego is a Policy Language for the Open Policy Agent eco system. The gist is that everything between the `{}` is a `rule`. Everything between `{}` should evaluate to `true`. Assignments yield true, and if any statement in the `{}` block is false then the entire rule will return `false` and therfore fail.
 
-
-
+For more information you can try: https://www.openpolicyagent.org/docs/latest/#rego
+Or for a Online playground: https://play.openpolicyagent.org/
 
 
 
