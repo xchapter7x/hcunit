@@ -42,11 +42,20 @@ Help Options:
 ## Usage as a Standalone CLI... Download Binaries
 https://github.com/xchapter7x/hcunit/releases/latest
 
-## About hcunit
-- Uses [OPA and Rego](https://www.openpolicyagent.org/) to evaluate the yaml to see if it meets your expectations
-- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `assert ["some behavior"] { ... } ` or `expect ["some other behavior"] { ... } `. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
-- Your policy rules will have access to a input object. This object will be a hashmap of your rendered templates, with the hash being the filename, and the value being an object representation of the rendered yaml. It will also contain a hash for the NOTES file, which will be a string. 
-- uses helm's packages to render the templates so, it should yield identical output as the `helm template` command
+
+
+## Notes on Syntax and Rego
+
+Rego is a Policy Language for the Open Policy Agent eco system. We use rego here as our testing DSL. Any rego rule which is an `assert` or `expect` will get executed and must evaluated to true. The gist is that everything between the `{}` is a `rule`. Everything between `{}` should evaluate to `true`. Assignments yield true, and if any statement in the `{}` block is `false` then the entire rule will return `false` and therfore fail our test case.
+
+For more information you can try: https://www.openpolicyagent.org/docs/latest/#rego
+
+Or 
+
+for a Online playground: https://play.openpolicyagent.org/
+
+
+
 
 
 ## Options
@@ -118,16 +127,11 @@ your policy failed
 ```
 
 
-## Notes on Rego
-
-Rego is a Policy Language for the Open Policy Agent eco system. We use rego here as our testing DSL. Any rego rule which is an `assert` or `expect` will get executed and must evaluated to true. The gist is that everything between the `{}` is a `rule`. Everything between `{}` should evaluate to `true`. Assignments yield true, and if any statement in the `{}` block is `false` then the entire rule will return `false` and therfore fail our test case.
-
-For more information you can try: https://www.openpolicyagent.org/docs/latest/#rego
-
-Or 
-
-for a Online playground: https://play.openpolicyagent.org/
-
+## About hcunit
+- Uses [OPA and Rego](https://www.openpolicyagent.org/) to evaluate the yaml to see if it meets your expectations
+- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `assert ["some behavior"] { ... } ` or `expect ["some other behavior"] { ... } `. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
+- Your policy rules will have access to a input object. This object will be a hashmap of your rendered templates, with the hash being the filename, and the value being an object representation of the rendered yaml. It will also contain a hash for the NOTES file, which will be a string. 
+- uses helm's packages to render the templates so, it should yield identical output as the `helm template` command
 
 
 
