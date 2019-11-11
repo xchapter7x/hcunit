@@ -33,6 +33,13 @@ func TestEvalCommand(t *testing.T) {
 				failsWith: nil,
 			},
 			{
+				name:      "duplicate test hash",
+				template:  "testdata/templates",
+				values:    "testdata/values.yml",
+				policy:    "testdata/policy/individuals/duplicate_keynames.rego",
+				failsWith: commands.DuplicatePolicyFailure,
+			},
+			{
 				name:      "passing policy on a template directory",
 				template:  "testdata/templates",
 				values:    "testdata/values.yml",
@@ -57,7 +64,7 @@ func TestEvalCommand(t *testing.T) {
 				name:      "multifile failing policy on a template directory",
 				template:  "testdata/templates",
 				values:    "testdata/values.yml",
-				policy:    "testdata/policy",
+				policy:    "testdata/policy/failing",
 				failsWith: commands.PolicyFailure,
 			},
 			{

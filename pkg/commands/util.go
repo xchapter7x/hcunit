@@ -27,6 +27,7 @@ var FilepathDirUnexpected = errors.New("filepath given is a Dir. We expect a pat
 var UnmatchedQuery = errors.New("your given query did not yield any matches")
 var InvalidPolicyPath = errors.New("invalid policy path")
 var PolicyFailure = errors.New("your policy failed")
+var DuplicatePolicyFailure = errors.New("duplicate rule names found")
 var expectQuery = regexp.MustCompile("^expect(_[a-zA-Z]+)*$")
 
 func validateAndRender(template, values string) (map[string]string, error) {
@@ -216,10 +217,12 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 
 		testResults[queryString] = false
 		for _, result := range resultSet {
-			if len(result.Expressions) > 1 {
-				colorstring.Println("[yellow]WARNING: you have duplicate test names. This could cause test failures to NOT be detected properly")
+			if len(result.Bindings) > 0 {
+				colorstring.Println("[red]ERROR: you are using variables in your hash and might have duplicate test names. This could cause test failures to NOT be detected properly")
 				colorstring.Println(fmt.Sprintf("[yellow]DUPLICATE KEY: %s", queryString))
+				return DuplicatePolicyFailure
 			}
+
 			for _, expression := range result.Expressions {
 				if expression.Text == queryString {
 					testResults[queryString] = true
