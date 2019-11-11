@@ -13,7 +13,9 @@ import (
 
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/helm/helm/pkg/renderutil"
+	"github.com/mitchellh/colorstring"
 	"github.com/open-policy-agent/opa/rego"
+	"github.com/open-policy-agent/opa/tester"
 	"github.com/open-policy-agent/opa/topdown"
 	yaml "gopkg.in/yaml.v3"
 	"k8s.io/helm/pkg/chartutil"
@@ -174,28 +176,54 @@ func validateFilePath(filePath string) (*os.File, error) {
 	return fileFile, nil
 }
 
+func getQueryList(policy string) []string {
+	res := []string{}
+	mods, _, _ := tester.Load([]string{policy}, nil)
+	for _, mod := range mods {
+		for _, rule := range mod.Rules {
+			if strings.HasPrefix("expect[", string(rule.Head.Name)) ||
+				strings.HasPrefix("assert[", string(rule.Head.Name)) {
+				res = append(res, fmt.Sprintf("%s[%s]", rule.Head.Name, rule.Head.Key))
+			}
+		}
+	}
+	return res
+}
+
 func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input interface{}) error {
 	bufWriter := new(bytes.Buffer)
+	testResults := make(map[string]bool)
 	ctx := context.Background()
 	var results rego.ResultSet
-	for _, querySuffix := range []string{"expect[_]", "assert[_]"} {
+	for _, querySuffix := range getQueryList(policy) {
+		queryString := fmt.Sprintf("data.%s.%s", namespace, querySuffix)
 		buf := topdown.NewBufferTracer()
-		query, err := rego.New(
-			rego.Query(fmt.Sprintf("data.%s.%s", namespace, querySuffix)),
+		r := rego.New(
+			rego.Query(queryString),
 			rego.Tracer(buf),
 			rego.Load([]string{policy}, nil),
-		).PrepareForEval(ctx)
+		)
+		query, err := r.PrepareForEval(ctx)
 		if err != nil {
 			return fmt.Errorf("failed preparing for eval on policies: %w", err)
 		}
 
-		r, err := query.Eval(ctx, rego.EvalInput(input))
+		resultSet, err := query.Eval(ctx, rego.EvalInput(input))
 		if err != nil {
 			return fmt.Errorf("failed eval on policies: %w", err)
 		}
 
-		if len(r) > 0 {
-			results = append(results, r...)
+		testResults[queryString] = false
+		for _, result := range resultSet {
+			for _, expression := range result.Expressions {
+				if expression.Text == queryString {
+					testResults[queryString] = true
+				}
+			}
+		}
+
+		if len(resultSet) > 0 {
+			results = append(results, resultSet...)
 			topdown.PrettyTrace(bufWriter, *buf)
 			fmt.Fprint(writer, bufWriter.String())
 		}
@@ -205,11 +233,23 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 		return UnmatchedQuery
 	}
 
-	if strings.Contains(bufWriter.String(), "Fail ") {
-		fmt.Println("[FAIL] Your policy rules are violated in your rendered output!")
+	testFailed := false
+	for testname, passed := range testResults {
+		if passed {
+			colorstring.Print("[green]PASS: ")
+			fmt.Println(testname)
+		} else {
+			testFailed = true
+			colorstring.Print("[red]FAIL: ")
+			fmt.Println(testname)
+		}
+	}
+
+	if testFailed {
+		colorstring.Println("[red][FAILURE] Policy violations found on the Helm Chart!")
 		return PolicyFailure
 	}
 
-	fmt.Println("[PASS] Your policy rules have been run successfully!")
+	colorstring.Println("[green][SUCCESS] Your Helm Chart complies with all policies!")
 	return nil
 }
