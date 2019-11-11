@@ -195,7 +195,8 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 	testResults := make(map[string]bool)
 	ctx := context.Background()
 	var results rego.ResultSet
-	for _, querySuffix := range getQueryList(policy) {
+	queryList := getQueryList(policy)
+	for _, querySuffix := range queryList {
 		queryString := fmt.Sprintf("data.%s.%s", namespace, querySuffix)
 		buf := topdown.NewBufferTracer()
 		r := rego.New(
@@ -215,6 +216,10 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 
 		testResults[queryString] = false
 		for _, result := range resultSet {
+			if len(result.Expressions) > 1 {
+				colorstring.Println("[yellow]WARNING: you have duplicate test names. This could cause test failures to NOT be detected properly")
+				colorstring.Println(fmt.Sprintf("[yellow]DUPLICATE KEY: %s", queryString))
+			}
 			for _, expression := range result.Expressions {
 				if expression.Text == queryString {
 					testResults[queryString] = true
