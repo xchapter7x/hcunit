@@ -177,14 +177,14 @@ func validateFilePath(filePath string) (*os.File, error) {
 	return fileFile, nil
 }
 
-func getQueryList(policy string) []string {
-	res := []string{}
+func getQueryList(policy string) map[string]int {
+	res := map[string]int{}
 	mods, _, _ := tester.Load([]string{policy}, nil)
 	for _, mod := range mods {
 		for _, rule := range mod.Rules {
 			if strings.HasPrefix("expect[", string(rule.Head.Name)) ||
 				strings.HasPrefix("assert[", string(rule.Head.Name)) {
-				res = append(res, fmt.Sprintf("%s[%s]", rule.Head.Name, rule.Head.Key))
+				res[fmt.Sprintf("%s[%s]", rule.Head.Name, rule.Head.Key)] += 1
 			}
 		}
 	}
@@ -197,7 +197,13 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 	ctx := context.Background()
 	var results rego.ResultSet
 	queryList := getQueryList(policy)
-	for _, querySuffix := range queryList {
+	for querySuffix, querymatches := range queryList {
+		if querymatches > 1 {
+			colorstring.Println("[red]ERROR: you are using duplicate test names or variables. This could cause test failures to NOT be detected properly")
+			colorstring.Println(fmt.Sprintf("[yellow]DUPLICATE KEY: %s", querySuffix))
+			return DuplicatePolicyFailure
+		}
+
 		queryString := fmt.Sprintf("data.%s.%s", namespace, querySuffix)
 		buf := topdown.NewBufferTracer()
 		r := rego.New(
@@ -217,11 +223,6 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 
 		testResults[queryString] = false
 		for _, result := range resultSet {
-			if len(result.Bindings) > 0 {
-				colorstring.Println("[red]ERROR: you are using variables in your hash and might have duplicate test names. This could cause test failures to NOT be detected properly")
-				colorstring.Println(fmt.Sprintf("[yellow]DUPLICATE KEY: %s", queryString))
-				return DuplicatePolicyFailure
-			}
 
 			for _, expression := range result.Expressions {
 				if expression.Text == queryString {
