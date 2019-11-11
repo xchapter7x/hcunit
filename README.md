@@ -84,16 +84,14 @@ Available commands:
 ───────┼───────────────────────────────────────────────────────────────
    1   │ package main
    2   │
-   3   │ assert [behavior] {
-   4   │   behavior = "this should always be true b/c its true"
-   5   │   true
-   6   │ }
-   7   │
-   8   │ assert [behavior] {
-   9   |     behavior = "when web is enabled then namespace is toggled on"
-   10  |     "true" == input["values.yaml"].web.enabled
-   11  │     "Namespace" == input["namespace.yaml"].kind
-   12  │ }
+   3   │ assert ["this should always be true b/c its true"] {
+   4   │   true
+   5   │ }
+   6   │
+   7   │ assert ["when web is enabled then namespace is toggled on"] {
+   8   |     "true" == input["values.yaml"].web.enabled
+   9   │     "Namespace" == input["namespace.yaml"].kind
+   10  │ }
 ───────┴───────────────────────────────────────────────────────────────
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
@@ -107,16 +105,14 @@ Available commands:
 ───────┼───────────────────────────────────────────────────────────────
    1   │ package main
    2   │
-   3   │ assert [behavior] {
-   4   │   behavior = "this should always be true b/c its true"
-   5   │   false
-   6   │ }
-   7   │
-   8   │ assert [behavior] {
-   9   |     behavior = "when web is enabled then namespace is toggled on"
-   10  |     "true" == input["values.yaml"].web.enabled
-   11  │     "NamespaceWrongKind" == input["namespace.yaml"].kind
-   12  │ }
+   3   │ assert ["this should always be true b/c its true"] {
+   4   │   false
+   5   │ }
+   6   │
+   7   │ assert ["when web is enabled then namespace is toggled on"] {
+   8   |     "true" == input["values.yaml"].web.enabled
+   9   │     "NamespaceWrongKind" == input["namespace.yaml"].kind
+   10  │ }
 ───────┴───────────────────────────────────────────────────────────────
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
