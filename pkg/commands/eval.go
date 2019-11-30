@@ -12,7 +12,7 @@ const valuesHashName = "values"
 type EvalCommand struct {
 	Writer    io.Writer
 	Template  string   `short:"t" long:"template" description:"path to yaml template you would like to render"`
-	Values    []string `short:"c" long:"values" description:"path to values file you would like to use for rendering"`
+	Values    []string `short:"c" long:"values" description:"path to values file(s) you would like to use for rendering"`
 	Policy    string   `short:"p" long:"policy" description:"path to rego policies to evaluate against rendered templates"`
 	Namespace string   `short:"n" long:"namespace" description:"policy namespace to query for rules"`
 	Verbose   bool     `short:"v" long:"verbose" description:"prints tracing output to stdout"`
