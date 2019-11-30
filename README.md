@@ -93,17 +93,15 @@ Available commands:
    5   │ }
    6   │
    7   │ assert ["when web is enabled then namespace is toggled on"] {
-   8   |     "true" == input["values.yaml"].web.enabled
+   8   |     "true" == input["values"].web.enabled
    9   │     "Namespace" == input["namespace.yaml"].kind
    10  │ }
 ───────┴───────────────────────────────────────────────────────────────
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
 -> % hcunit eval -t templates/ -c values.yaml -p policy/testing.rego
-PASS: data.main.expect["another passing case 123"]
-PASS: data.main.expect["force passing"]
-PASS: data.main.expect["another passing case"]
-PASS: data.main.expect["force passing abc"]
+PASS: data.main.assert["this should always be true b/c its true"]
+PASS: data.main.assert["when web is enabled then namespace is toggled on"]
 [SUCCESS] Your Helm Chart complies with all policies!
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
@@ -118,21 +116,15 @@ PASS: data.main.expect["force passing abc"]
    5   │ }
    6   │
    7   │ assert ["when web is enabled then namespace is toggled on"] {
-   8   |     "true" == input["values.yaml"].web.enabled
+   8   |     "true" == input["values"].web.enabled
    9   │     "NamespaceWrongKind" == input["namespace.yaml"].kind
    10  │ }
 ───────┴───────────────────────────────────────────────────────────────
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
 -> % hcunit eval -t templates/ -c values.yaml -p policy/testing_fail.rego
-FAIL: data.main.expect["force failure"]
-PASS: data.main.expect["some things pass"]
-PASS: data.main.expect["another passing case"]
-FAIL: data.main.expect["another force failure 123"]
-FAIL: data.main.expect["force failure 456"]
-PASS: data.main.expect["some things pass 789"]
-PASS: data.main.expect["another passing case 10 11 12"]
-FAIL: data.main.expect["another force failure"]
+FAIL: data.main.assert["this should always be true b/c its true"]
+FAIL: data.main.assert["when web is enabled then namespace is toggled on"]
 [FAILURE] Policy violations found on the Helm Chart!
 ```
 
