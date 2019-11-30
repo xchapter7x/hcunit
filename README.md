@@ -100,7 +100,11 @@ Available commands:
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
 -> % hcunit eval -t templates/ -c values.yaml -p policy/testing.rego
-[PASS] Your policy rules have been run successfully!
+PASS: data.main.expect["another passing case 123"]
+PASS: data.main.expect["force passing"]
+PASS: data.main.expect["another passing case"]
+PASS: data.main.expect["force passing abc"]
+[SUCCESS] Your Helm Chart complies with all policies!
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
 -> % cat policy/testing_fail.rego
@@ -121,9 +125,15 @@ Available commands:
 
 000@000-000 [00:00:00] [helm-charts/concourse] [master *]
 -> % hcunit eval -t templates/ -c values.yaml -p policy/testing_fail.rego
-[FAIL] Your policy rules are violated in your rendered output!
-your policy failed
-
+FAIL: data.main.expect["force failure"]
+PASS: data.main.expect["some things pass"]
+PASS: data.main.expect["another passing case"]
+FAIL: data.main.expect["another force failure 123"]
+FAIL: data.main.expect["force failure 456"]
+PASS: data.main.expect["some things pass 789"]
+PASS: data.main.expect["another passing case 10 11 12"]
+FAIL: data.main.expect["another force failure"]
+[FAILURE] Policy violations found on the Helm Chart!
 ```
 
 
