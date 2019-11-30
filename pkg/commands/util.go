@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -30,7 +31,52 @@ var PolicyFailure = errors.New("your policy failed")
 var DuplicatePolicyFailure = errors.New("duplicate rule names found")
 var expectQuery = regexp.MustCompile("^expect(_[a-zA-Z]+)*$")
 
-func validateAndRender(template, values string) (map[string]string, error) {
+func mergeValues(valueFiles []string) (map[string]interface{}, error) {
+	base := map[string]interface{}{}
+
+	for _, filePath := range valueFiles {
+		currentMap := map[string]interface{}{}
+
+		bytes, err := readFile(filePath)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := yaml.Unmarshal(bytes, &currentMap); err != nil {
+			return nil, fmt.Errorf("failed to parse %s: %w", filePath, err)
+		}
+		base = mergeMaps(base, currentMap)
+	}
+	return base, nil
+}
+
+func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{}, len(a))
+	for k, v := range a {
+		out[k] = v
+	}
+	for k, v := range b {
+		if v, ok := v.(map[string]interface{}); ok {
+			if bv, ok := out[k]; ok {
+				if bv, ok := bv.(map[string]interface{}); ok {
+					out[k] = mergeMaps(bv, v)
+					continue
+				}
+			}
+		}
+		out[k] = v
+	}
+	return out
+}
+
+func readFile(filePath string) ([]byte, error) {
+	if strings.TrimSpace(filePath) == "-" {
+		return ioutil.ReadAll(os.Stdin)
+	}
+	return ioutil.ReadFile(filePath)
+}
+
+func validateAndRender(template string, values []string) (map[string]string, error) {
 	templateFiles, err := validateFileOrDirPath(template)
 	if err != nil {
 		return nil, fmt.Errorf("template validation failed: %w", err)
@@ -155,26 +201,29 @@ func validateFileOrDirPath(filePath string) (map[string]io.ReadCloser, error) {
 	return map[string]io.ReadCloser{filePath: fileFile}, nil
 }
 
-func validateFilePath(filePath string) (*os.File, error) {
-	if filePath == "" {
+func validateFilePath(filePaths []string) (io.ReadCloser, error) {
+	if len(filePaths) == 0 {
 		return nil, FilepathValueEmpty
 	}
 
-	fileFile, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("invalid Values path given: %w", err)
-	}
+	for _, filePath := range filePaths {
+		fileFile, err := os.Open(filePath)
+		if err != nil {
+			return nil, fmt.Errorf("invalid Values path given: %w", err)
+		}
 
-	fileStatus, err := fileFile.Stat()
-	if err != nil {
-		return nil, fmt.Errorf("error while checking file status: %w", err)
-	}
+		fileStatus, err := fileFile.Stat()
+		if err != nil {
+			return nil, fmt.Errorf("error while checking file status: %w", err)
+		}
 
-	fileMode := fileStatus.Mode()
-	if fileMode.IsDir() {
-		return nil, FilepathDirUnexpected
+		fileMode := fileStatus.Mode()
+		if fileMode.IsDir() {
+			return nil, FilepathDirUnexpected
+		}
+		return fileFile, nil
 	}
-	return fileFile, nil
+	return nil, FilepathValueEmpty
 }
 
 func getQueryList(policy string) map[string]int {
@@ -255,7 +304,7 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 	}
 
 	if testFailed {
-		colorstring.Println("[red][FAILURE] Policy violations found on the Helm Chart!")
+		colorstring.Println("[_red_][FAILURE] Policy violations found on the Helm Chart!")
 		return PolicyFailure
 	}
 

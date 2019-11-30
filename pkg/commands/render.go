@@ -9,8 +9,8 @@ import (
 
 type RenderCommand struct {
 	Writer   io.Writer
-	Template string `short:"t" long:"template" description:"path to yaml template you would like to render"`
-	Values   string `short:"c" long:"values" description:"path to values file you would like to use for rendering"`
+	Template string   `short:"t" long:"template" description:"path to yaml template you would like to render"`
+	Values   []string `short:"c" long:"values" description:"path to values file you would like to use for rendering"`
 }
 
 func (s *RenderCommand) Execute(args []string) error {

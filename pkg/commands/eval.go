@@ -4,20 +4,18 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
-	"path/filepath"
-
-	yaml "gopkg.in/yaml.v3"
 )
+
+const valuesHashName = "values"
 
 type EvalCommand struct {
 	Writer    io.Writer
-	Template  string `short:"t" long:"template" description:"path to yaml template you would like to render"`
-	Values    string `short:"c" long:"values" description:"path to values file you would like to use for rendering"`
-	Policy    string `short:"p" long:"policy" description:"path to rego policies to evaluate against rendered templates"`
-	Namespace string `short:"n" long:"namespace" description:"policy namespace to query for rules"`
-	Verbose   bool   `short:"v" long:"verbose" description:"prints tracing output to stdout"`
+	Template  string   `short:"t" long:"template" description:"path to yaml template you would like to render"`
+	Values    []string `short:"c" long:"values" description:"path to values file you would like to use for rendering"`
+	Policy    string   `short:"p" long:"policy" description:"path to rego policies to evaluate against rendered templates"`
+	Namespace string   `short:"n" long:"namespace" description:"policy namespace to query for rules"`
+	Verbose   bool     `short:"v" long:"verbose" description:"prints tracing output to stdout"`
 }
 
 func (s *EvalCommand) Execute(args []string) error {
@@ -38,15 +36,9 @@ func (s *EvalCommand) Execute(args []string) error {
 		return fmt.Errorf("error while rendering: %w", err)
 	}
 
-	var valuesConfig interface{}
-	valuesFile, err := ioutil.ReadFile(s.Values)
+	valuesConfig, err := mergeValues(s.Values)
 	if err != nil {
 		return fmt.Errorf("yamlFile.Get err   #%v ", err)
-	}
-
-	err = yaml.Unmarshal(valuesFile, &valuesConfig)
-	if err != nil {
-		return fmt.Errorf("Unmarshal %s failed: %v", valuesFile, err)
 	}
 
 	policyInput, err := UnmarshalYamlMap(renderedOutput)
@@ -54,7 +46,7 @@ func (s *EvalCommand) Execute(args []string) error {
 		return fmt.Errorf("formatting policy input failed: %w", err)
 	}
 
-	policyInput[filepath.Base(s.Values)] = valuesConfig
+	policyInput[valuesHashName] = valuesConfig
 	return evalPolicyOnInput(s.Writer, s.Policy, s.Namespace, policyInput)
 }
 

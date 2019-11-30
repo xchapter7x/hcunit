@@ -1,8 +1,8 @@
 package main
 
 allow ["input object should provide values in hash"] {
-  input["values.yml"]
+  input["values"]
 }
 deny ["input object should provide values in hash"] {
-  input["values.yml"]
+  input["values"]
 }

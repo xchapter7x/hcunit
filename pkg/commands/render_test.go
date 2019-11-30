@@ -14,11 +14,11 @@ func TestRenderCommand(t *testing.T) {
 		for _, tt := range []struct {
 			name     string
 			template string
-			values   string
+			values   []string
 			contains []string
 		}{
-			{"template filepath", "testdata/templates/something.yml", "testdata/values.yml", []string{controlYaml}},
-			{"template dir path", "testdata/templates", "testdata/values.yml", []string{controlYaml, controlNotes}},
+			{"template filepath", "testdata/templates/something.yml", []string{"testdata/values.yml"}, []string{controlYaml}},
+			{"template dir path", "testdata/templates", []string{"testdata/values.yml"}, []string{controlYaml, controlNotes}},
 		} {
 			t.Run(tt.name, func(t *testing.T) {
 				stdOut := new(bytes.Buffer)
@@ -65,7 +65,7 @@ func TestRenderCommand(t *testing.T) {
 			},
 			{
 				name:        "no template",
-				render:      &commands.RenderCommand{Values: "hi/there"},
+				render:      &commands.RenderCommand{Values: []string{"hi/there"}},
 				shouldError: true,
 			},
 			{
@@ -75,27 +75,27 @@ func TestRenderCommand(t *testing.T) {
 			},
 			{
 				name:        "invalid template",
-				render:      &commands.RenderCommand{Values: "hi/there", Template: "yo/yo"},
+				render:      &commands.RenderCommand{Values: []string{"hi/there"}, Template: "yo/yo"},
 				shouldError: true,
 			},
 			{
 				name:        "invliad values",
-				render:      &commands.RenderCommand{Template: "hi/There", Values: "yo/yo"},
+				render:      &commands.RenderCommand{Template: "hi/There", Values: []string{"yo/yo"}},
 				shouldError: true,
 			},
 			{
 				name:        "values is not a file",
-				render:      &commands.RenderCommand{Template: "testdata/templates/something.yml", Values: "testdata/"},
+				render:      &commands.RenderCommand{Template: "testdata/templates/something.yml", Values: []string{"testdata/"}},
 				shouldError: true,
 			},
 			{
 				name:        "valid template & values file paths",
-				render:      &commands.RenderCommand{Template: "testdata/templates/something.yml", Values: "testdata/values.yml"},
+				render:      &commands.RenderCommand{Template: "testdata/templates/something.yml", Values: []string{"testdata/values.yml"}},
 				shouldError: false,
 			},
 			{
 				name:        "valid template dir & values file path",
-				render:      &commands.RenderCommand{Template: "testdata/templates", Values: "testdata/values.yml"},
+				render:      &commands.RenderCommand{Template: "testdata/templates", Values: []string{"testdata/values.yml"}},
 				shouldError: false,
 			},
 		} {

@@ -14,7 +14,7 @@ func TestEvalCommand(t *testing.T) {
 		for _, tt := range []struct {
 			name      string
 			template  string
-			values    string
+			values    []string
 			policy    string
 			failsWith error
 			skip      bool
@@ -22,90 +22,90 @@ func TestEvalCommand(t *testing.T) {
 			{
 				name:      "invalid policy path given",
 				template:  "testdata/templates/something.yml",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				failsWith: commands.InvalidPolicyPath,
 			},
 			{
 				name:      "passing policy on a single template",
 				template:  "testdata/templates/something.yml",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/passing/passing.rego",
 				failsWith: nil,
 			},
 			{
 				name:      "duplicate test hash",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/individuals/duplicate_keynames.rego",
 				failsWith: commands.DuplicatePolicyFailure,
 			},
 			{
 				name:      "passing policy on a template directory",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/passing/passing.rego",
 				failsWith: nil,
 			},
 			{
 				name:      "failing policy on a single template",
 				template:  "testdata/templates/something.yml",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/failing/failing.rego",
 				failsWith: commands.PolicyFailure,
 			},
 			{
 				name:      "failing policy on a template directory",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/failing/failing.rego",
 				failsWith: commands.PolicyFailure,
 			},
 			{
 				name:      "multifile failing policy on a template directory",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/failing",
 				failsWith: commands.PolicyFailure,
 			},
 			{
 				name:      "multifile passing policy on a template directory",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/passing",
 				failsWith: nil,
 			},
 			{
 				name:      "has a properly structured input object",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/individuals/parse_input.rego",
 				failsWith: nil,
 			},
 			{
 				name:      "values.yml available in input",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/individuals/values_in_input.rego",
 				failsWith: nil,
 			},
 			{
 				name:      "templates available in input",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/individuals/templates_in_input.rego",
 				failsWith: nil,
 			},
 			{
 				name:      "supports assert[_] rule query",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/individuals/alternate_keyword.rego",
 				failsWith: nil,
 			},
 			{
 				name:      "should error when no query match in rego",
 				template:  "testdata/templates",
-				values:    "testdata/values.yml",
+				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/individuals/no_keyword.rego",
 				failsWith: commands.UnmatchedQuery,
 			},
