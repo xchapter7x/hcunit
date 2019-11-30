@@ -125,12 +125,8 @@ your policy failed
 
 ## About hcunit
 - Uses [OPA and Rego](https://www.openpolicyagent.org/) to evaluate the yaml to see if it meets your expectations
-- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `assert ["some behavior"] { ... } ` or `expect ["some other behavior"] { ... } `. it is a good idea to define the hash value within the rule so it prints during a `--verbose` call 
+- By convention hcunit will run any rules in your given rego file or recursively in a given directory as long as that rule takes the form `assert ["some behavior"] { ... } ` or `expect ["some other behavior"] { ... } `.
+- using variables or duplicate values in the hash for your tests is prohibited by hcunit. Reason being duplicate hashes opens up the potential for inconsistent/confusing results. 
 - Your policy rules will have access to a input object. This object will be a hashmap of your rendered templates, with the hash being the filename, and the value being an object representation of the rendered yaml. It will also contain a hash for the NOTES file, which will be a string. 
 - uses helm's packages to render the templates so, it should yield identical output as the `helm template` command
-
-
-
-
-
-
+- supports multiple values.yml file inputs, does not yet support values set as flags in the cli call.
