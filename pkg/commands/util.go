@@ -76,17 +76,17 @@ func readFile(filePath string) ([]byte, error) {
 	return ioutil.ReadFile(filePath)
 }
 
-func validateAndRender(template string, values []string) (map[string]string, error) {
-	templateFiles, err := validateFileOrDirPath(template)
+func validateAndRender(templatePath string, valuesMap map[string]interface{}) (map[string]string, error) {
+	templateFiles, err := validateFileOrDirPath(templatePath)
 	if err != nil {
 		return nil, fmt.Errorf("template validation failed: %w", err)
 	}
-
-	valuesFile, err := validateFilePath(values)
+	values, err := yaml.Marshal(valuesMap)
 	if err != nil {
-		return nil, fmt.Errorf("values validation failed: %w", err)
+		return nil, fmt.Errorf("couldnt marshal values: %w", err)
 	}
 
+	valuesFile := ioutil.NopCloser(bytes.NewReader(values))
 	return render(valuesFile, templateFiles)
 }
 

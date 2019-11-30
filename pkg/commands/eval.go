@@ -30,15 +30,14 @@ func (s *EvalCommand) Execute(args []string) error {
 		return InvalidPolicyPath
 	}
 	fileFile.Close()
-
-	renderedOutput, err := validateAndRender(s.Template, s.Values)
-	if err != nil {
-		return fmt.Errorf("error while rendering: %w", err)
-	}
-
 	valuesConfig, err := mergeValues(s.Values)
 	if err != nil {
-		return fmt.Errorf("yamlFile.Get err   #%v ", err)
+		return fmt.Errorf("failed merging values files %w ", err)
+	}
+
+	renderedOutput, err := validateAndRender(s.Template, valuesConfig)
+	if err != nil {
+		return fmt.Errorf("error while rendering: %w", err)
 	}
 
 	policyInput, err := UnmarshalYamlMap(renderedOutput)

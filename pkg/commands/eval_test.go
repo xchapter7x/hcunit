@@ -103,6 +103,20 @@ func TestEvalCommand(t *testing.T) {
 				failsWith: nil,
 			},
 			{
+				name:      "supports mulitple values files",
+				template:  "testdata/templates",
+				values:    []string{"testdata/values.yml", "testdata/added_values.yml"},
+				policy:    "testdata/policy/individuals/multiple_values.rego",
+				failsWith: nil,
+			},
+			{
+				name:      "supports mulitple values files last file wins",
+				template:  "testdata/templates",
+				values:    []string{"testdata/added_values.yml", "testdata/values.yml"},
+				policy:    "testdata/policy/individuals/multiple_values.rego",
+				failsWith: commands.UnmatchedQuery,
+			},
+			{
 				name:      "should error when no query match in rego",
 				template:  "testdata/templates",
 				values:    []string{"testdata/values.yml"},

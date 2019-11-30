@@ -15,7 +15,12 @@ type RenderCommand struct {
 
 func (s *RenderCommand) Execute(args []string) error {
 	s.setDefaults()
-	renderedOutput, err := validateAndRender(s.Template, s.Values)
+	valuesConfig, err := mergeValues(s.Values)
+	if err != nil {
+		return fmt.Errorf("failed merging values files %w ", err)
+	}
+
+	renderedOutput, err := validateAndRender(s.Template, valuesConfig)
 	if err != nil {
 		return fmt.Errorf("error while rendering: %w", err)
 	}
