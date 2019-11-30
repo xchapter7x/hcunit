@@ -16,7 +16,11 @@ $> helm env | grep "HELM_PLUGIN" | awk -F"=" '{print $2}' | awk -F\" '{print "ch
 
 $> echo "lets run some tests of our templates' logic"
 $> helm unit -t templates -c policy/values_toggle_on.yaml -p policy/testing_toggle_on.rego
-[PASS] Your policy rules have been run successfully!
+PASS: data.main.expect["another passing case 123"]
+PASS: data.main.expect["force passing"]
+PASS: data.main.expect["another passing case"]
+PASS: data.main.expect["force passing abc"]
+[SUCCESS] Your Helm Chart complies with all policies!
 
 $> echo "lets explore the available flags for the plugin call"
 $> helm unit --help
