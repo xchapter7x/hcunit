@@ -287,7 +287,7 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 		}
 	}
 
-	if len(results) <= 0 {
+	if len(queryList) <= 0 {
 		return UnmatchedQuery
 	}
 

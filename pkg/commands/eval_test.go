@@ -114,7 +114,7 @@ func TestEvalCommand(t *testing.T) {
 				template:  "testdata/templates",
 				values:    []string{"testdata/added_values.yml", "testdata/values.yml"},
 				policy:    "testdata/policy/individuals/multiple_values.rego",
-				failsWith: commands.UnmatchedQuery,
+				failsWith: commands.PolicyFailure,
 			},
 			{
 				name:      "should error when no query match in rego",
@@ -122,6 +122,13 @@ func TestEvalCommand(t *testing.T) {
 				values:    []string{"testdata/values.yml"},
 				policy:    "testdata/policy/individuals/no_keyword.rego",
 				failsWith: commands.UnmatchedQuery,
+			},
+			{
+				name:      "no passing assertions",
+				template:  "testdata/templates",
+				values:    []string{"testdata/values.yml"},
+				policy:    "testdata/policy/individuals/no_passing_valid.rego",
+				failsWith: commands.PolicyFailure,
 			},
 		} {
 			t.Run(tt.name, func(t *testing.T) {
