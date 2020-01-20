@@ -164,16 +164,12 @@ func render(values io.ReadCloser, templates map[string]io.ReadCloser) (map[strin
 //WalkTemplatePath - walk a given template path to read all
 // of the templates (even nested templates) into a map
 func WalkTemplatePath(templatePath string) (map[string]io.ReadCloser, error) {
-	if os.Getenv("HCUNIT_NESTED_TEMPLATES") != "1" {
-		return validateFileOrDirPath(templatePath)
-	}
-
 	templates := make(map[string]io.ReadCloser)
 	err := filepath.Walk(templatePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
+			return fmt.Errorf("failure accessing a path %q: %w", path, err)
 		}
+
 		if !info.IsDir() {
 			template, err := os.Open(path)
 			if err != nil {
@@ -190,47 +186,6 @@ func WalkTemplatePath(templatePath string) (map[string]io.ReadCloser, error) {
 	}
 
 	return templates, nil
-}
-
-func validateFileOrDirPath(filePath string) (map[string]io.ReadCloser, error) {
-	if filePath == "" {
-		return nil, FilepathValueEmpty
-	}
-
-	fileFile, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("invalid Template path given: %w", err)
-	}
-
-	fileStatus, err := fileFile.Stat()
-	if err != nil {
-		return nil, fmt.Errorf("error while checking file status: %w", err)
-	}
-
-	fileMode := fileStatus.Mode()
-	if fileMode.IsDir() {
-		filePointers, err := fileFile.Readdir(-1)
-		fileFile.Close()
-		if err != nil {
-			return nil, fmt.Errorf("reading files from directory failed: %w", err)
-		}
-
-		files := make(map[string]io.ReadCloser)
-
-		for _, file := range filePointers {
-			filePath := fmt.Sprintf("%s/%s", filePath, file.Name())
-			fileReadCloser, err := os.Open(filePath)
-			if err != nil {
-				return nil, fmt.Errorf("reading file failed: %w", err)
-			}
-
-			files[filePath] = fileReadCloser
-		}
-
-		return files, nil
-	}
-
-	return map[string]io.ReadCloser{filePath: fileFile}, nil
 }
 
 func getQueryList(policy string) map[string]int {

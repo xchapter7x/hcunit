@@ -2,7 +2,6 @@ package commands_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/xchapter7x/hcunit/pkg/commands"
@@ -11,7 +10,6 @@ import (
 func TestWalkTemplatePath(t *testing.T) {
 	for _, tt := range []struct {
 		name                     string
-		envToggle                string
 		templatePath             string
 		nestedTemplatesSupported bool
 		nestedPath               string
@@ -19,17 +17,7 @@ func TestWalkTemplatePath(t *testing.T) {
 		skip                     bool
 	}{
 		{
-			name:                     "toggle off nested templates",
-			envToggle:                "0",
-			templatePath:             "testdata/templates",
-			nestedTemplatesSupported: false,
-			nestedPath:               "testdata/templates/nested/something_else.yml",
-			flatPath:                 "testdata/templates/something.yml",
-			skip:                     false,
-		},
-		{
 			name:                     "walking templates that include nested templates",
-			envToggle:                "1",
 			templatePath:             "testdata/templates",
 			nestedTemplatesSupported: true,
 			nestedPath:               "testdata/templates/nested/something_else.yml",
@@ -42,8 +30,6 @@ func TestWalkTemplatePath(t *testing.T) {
 				t.Skip("this feature is not yet activated")
 			}
 
-			os.Setenv("HCUNIT_NESTED_TEMPLATES", tt.envToggle)
-			defer os.Setenv("HCUNIT_NESTED_TEMPLATES", "")
 			templates, err := commands.WalkTemplatePath(tt.templatePath)
 			if err != nil {
 				t.Errorf("We should not have failed walking templates: %v", err)
