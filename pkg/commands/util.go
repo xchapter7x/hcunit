@@ -167,7 +167,29 @@ func WalkTemplatePath(templatePath string) (map[string]io.ReadCloser, error) {
 	if os.Getenv("HCUNIT_NESTED_TEMPLATES") != "1" {
 		return validateFileOrDirPath(templatePath)
 	}
-	return nil, fmt.Errorf("nested templates not yet supported")
+
+	templates := make(map[string]io.ReadCloser)
+	err := filepath.Walk(templatePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			return err
+		}
+		if !info.IsDir() {
+			template, err := os.Open(path)
+			if err != nil {
+				return fmt.Errorf("reading file failed: %w", err)
+			}
+
+			templates[path] = template
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error walking the path %q: %v\n", templatePath, err)
+	}
+
+	return templates, nil
 }
 
 func validateFileOrDirPath(filePath string) (map[string]io.ReadCloser, error) {

@@ -28,13 +28,13 @@ func TestWalkTemplatePath(t *testing.T) {
 			skip:                     false,
 		},
 		{
-			name:                     "Toggled on nested templates",
+			name:                     "walking templates that include nested templates",
 			envToggle:                "1",
 			templatePath:             "testdata/templates",
 			nestedTemplatesSupported: true,
 			nestedPath:               "testdata/templates/nested/something_else.yml",
 			flatPath:                 "testdata/templates/something.yml",
-			skip:                     true,
+			skip:                     false,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
