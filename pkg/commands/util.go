@@ -77,10 +77,11 @@ func readFile(filePath string) ([]byte, error) {
 }
 
 func validateAndRender(templatePath string, valuesMap map[string]interface{}) (map[string]string, error) {
-	templateFiles, err := validateFileOrDirPath(templatePath)
+	templateFiles, err := WalkTemplatePath(templatePath)
 	if err != nil {
 		return nil, fmt.Errorf("template validation failed: %w", err)
 	}
+
 	values, err := yaml.Marshal(valuesMap)
 	if err != nil {
 		return nil, fmt.Errorf("couldnt marshal values: %w", err)
@@ -160,6 +161,15 @@ func render(values io.ReadCloser, templates map[string]io.ReadCloser) (map[strin
 	return renderutil.Render(testChart, defaultConfig, defaultOptions)
 }
 
+//WalkTemplatePath - walk a given template path to read all
+// of the templates (even nested templates) into a map
+func WalkTemplatePath(templatePath string) (map[string]io.ReadCloser, error) {
+	if os.Getenv("HCUNIT_NESTED_TEMPLATES") != "1" {
+		return validateFileOrDirPath(templatePath)
+	}
+	return nil, fmt.Errorf("nested templates not yet supported")
+}
+
 func validateFileOrDirPath(filePath string) (map[string]io.ReadCloser, error) {
 	if filePath == "" {
 		return nil, FilepathValueEmpty
@@ -199,31 +209,6 @@ func validateFileOrDirPath(filePath string) (map[string]io.ReadCloser, error) {
 	}
 
 	return map[string]io.ReadCloser{filePath: fileFile}, nil
-}
-
-func validateFilePath(filePaths []string) (io.ReadCloser, error) {
-	if len(filePaths) == 0 {
-		return nil, FilepathValueEmpty
-	}
-
-	for _, filePath := range filePaths {
-		fileFile, err := os.Open(filePath)
-		if err != nil {
-			return nil, fmt.Errorf("invalid Values path given: %w", err)
-		}
-
-		fileStatus, err := fileFile.Stat()
-		if err != nil {
-			return nil, fmt.Errorf("error while checking file status: %w", err)
-		}
-
-		fileMode := fileStatus.Mode()
-		if fileMode.IsDir() {
-			return nil, FilepathDirUnexpected
-		}
-		return fileFile, nil
-	}
-	return nil, FilepathValueEmpty
 }
 
 func getQueryList(policy string) map[string]int {

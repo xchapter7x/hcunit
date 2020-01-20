@@ -2,10 +2,67 @@ package commands_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/xchapter7x/hcunit/pkg/commands"
 )
+
+func TestWalkTemplatePath(t *testing.T) {
+	for _, tt := range []struct {
+		name                     string
+		envToggle                string
+		templatePath             string
+		nestedTemplatesSupported bool
+		nestedPath               string
+		flatPath                 string
+		skip                     bool
+	}{
+		{
+			name:                     "toggle off nested templates",
+			envToggle:                "0",
+			templatePath:             "testdata/templates",
+			nestedTemplatesSupported: false,
+			nestedPath:               "testdata/templates/nested/something_else.yml",
+			flatPath:                 "testdata/templates/something.yml",
+			skip:                     false,
+		},
+		{
+			name:                     "Toggled on nested templates",
+			envToggle:                "1",
+			templatePath:             "testdata/templates",
+			nestedTemplatesSupported: true,
+			nestedPath:               "testdata/templates/nested/something_else.yml",
+			flatPath:                 "testdata/templates/something.yml",
+			skip:                     true,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.skip {
+				t.Skip("this feature is not yet activated")
+			}
+
+			os.Setenv("HCUNIT_NESTED_TEMPLATES", tt.envToggle)
+			defer os.Setenv("HCUNIT_NESTED_TEMPLATES", "")
+			templates, err := commands.WalkTemplatePath(tt.templatePath)
+			if err != nil {
+				t.Errorf("We should not have failed walking templates: %v", err)
+			}
+
+			if _, ok := templates[tt.nestedPath]; ok != tt.nestedTemplatesSupported {
+				t.Errorf(
+					"the template map doesnt match its expected feature support inmap:%v != supported:%v",
+					ok,
+					tt.nestedTemplatesSupported,
+				)
+			}
+
+			if _, ok := templates[tt.flatPath]; !ok {
+				t.Errorf("couldnt find expected template %s in %v", tt.flatPath, templates)
+			}
+		})
+	}
+}
 
 func TestUnmarshalYamlMap(t *testing.T) {
 	for _, tt := range []struct {
