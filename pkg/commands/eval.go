@@ -50,9 +50,12 @@ func (s *EvalCommand) Execute(args []string) error {
 }
 
 func (s *EvalCommand) setDefaults() {
-	s.Writer = new(bytes.Buffer)
-	if s.Verbose {
+	if s.Writer == nil {
 		s.Writer = os.Stdout
+	}
+
+	if !s.Verbose {
+		s.Writer = new(bytes.Buffer)
 	}
 
 	if s.Namespace == "" {

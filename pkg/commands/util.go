@@ -203,7 +203,6 @@ func getQueryList(policy string) map[string]int {
 }
 
 func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input interface{}) error {
-	bufWriter := new(bytes.Buffer)
 	testResults := make(map[string]bool)
 	ctx := context.Background()
 	var results rego.ResultSet
@@ -244,9 +243,9 @@ func evalPolicyOnInput(writer io.Writer, policy string, namespace string, input 
 
 		if len(resultSet) > 0 {
 			results = append(results, resultSet...)
-			topdown.PrettyTrace(bufWriter, *buf)
-			fmt.Fprint(writer, bufWriter.String())
 		}
+
+		topdown.PrettyTrace(writer, *buf)
 	}
 
 	if len(queryList) <= 0 {

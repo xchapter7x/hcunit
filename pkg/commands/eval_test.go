@@ -18,6 +18,7 @@ func TestEvalCommand(t *testing.T) {
 			policy    string
 			failsWith error
 			skip      bool
+			verbose   bool
 		}{
 			{
 				name:      "invalid policy path given",
@@ -130,6 +131,22 @@ func TestEvalCommand(t *testing.T) {
 				policy:    "testdata/policy/individuals/no_passing_valid.rego",
 				failsWith: commands.PolicyFailure,
 			},
+			{
+				name:      "verbosity on success should print trace information",
+				template:  "testdata/templates",
+				values:    []string{"testdata/values.yml", "testdata/added_values.yml"},
+				policy:    "testdata/policy/individuals/multiple_values.rego",
+				failsWith: nil,
+				verbose:   true,
+			},
+			{
+				name:      "verbosity on failure should print trace information",
+				template:  "testdata/templates",
+				values:    []string{"testdata/values.yml"},
+				policy:    "testdata/policy/individuals/no_passing_valid.rego",
+				failsWith: commands.PolicyFailure,
+				verbose:   true,
+			},
 		} {
 			t.Run(tt.name, func(t *testing.T) {
 				if tt.skip {
@@ -142,10 +159,19 @@ func TestEvalCommand(t *testing.T) {
 					Template: tt.template,
 					Policy:   tt.policy,
 					Values:   tt.values,
+					Verbose:  tt.verbose,
 				}
 				err := evalCmd.Execute([]string{})
 				if err != nil && !errors.Is(err, tt.failsWith) {
 					t.Errorf("expected error:\n%v\ngot:\n%v", tt.failsWith, err)
+				}
+
+				if !tt.verbose && stdOut.Len() > 0 {
+					t.Errorf("when verbose is off this should always be empty, but it contains %v bytes", stdOut.Len())
+				}
+
+				if tt.verbose && stdOut.Len() == 0 {
+					t.Errorf("we expected to print verbose trace information, but it is empty")
 				}
 
 				if err == nil && tt.failsWith != nil {
