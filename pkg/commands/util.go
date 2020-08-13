@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/helm/helm/pkg/renderutil"
+	"k8s.io/helm/pkg/renderutil"
 	"github.com/mitchellh/colorstring"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/tester"
