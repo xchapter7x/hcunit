@@ -27,5 +27,5 @@ require (
 	golang.org/x/sys v0.0.0-20191008105621-543471e840be // indirect
 	gopkg.in/yaml.v3 v3.0.0-20191010095647-fc94e3f71652
 	k8s.io/apimachinery v0.0.0-20191006235458-f9f2f3f8ab02 // indirect
-	k8s.io/helm v2.14.3+incompatible
+	k8s.io/helm v2.16.11+incompatible
 )
