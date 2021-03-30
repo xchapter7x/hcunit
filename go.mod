@@ -11,7 +11,7 @@ require (
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/golang/protobuf v1.3.1
+	github.com/golang/protobuf v1.5.2
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/jessevdk/go-flags v1.4.0
